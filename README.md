@@ -86,8 +86,13 @@ Contributions, issues, and feature requests are welcome!
 Ashutosh Rajput
 
 GitHub: @ashutosh250604
+
 LinkedIn: Ashutosh Rajput
+
 Email: ashutoshrajput2506atgmaildotcom
+
 🙏 Acknowledgments
+
 Icons by Lucide
+
 Deployment by Vercel
