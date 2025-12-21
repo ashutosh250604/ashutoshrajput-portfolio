@@ -23,7 +23,7 @@ https://ashutoshrajput-portfolio.vercel.app/
 - **Styling:** Tailwind CSS
 - **Icons:** Lucide React
 - **Animations:** Framer Motion
-- **Deployment:** Github Pages
+- **Deployment:** Vercel
 
 ## 📁 Project Structure
 ├── app/
@@ -88,4 +88,4 @@ LinkedIn: Ashutosh Rajput
 Email: ashutoshrajput2506atgmaildotcom
 🙏 Acknowledgments
 Icons by Lucide
-Deployment by Github Pages
+Deployment by Vercel
