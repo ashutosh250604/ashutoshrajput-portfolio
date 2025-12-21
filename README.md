@@ -70,7 +70,7 @@ npm run dev
 # or
 yarn dev
 
-exit
+```
 
 Open http://localhost:3000 in your browser.
 
