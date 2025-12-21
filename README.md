@@ -70,6 +70,8 @@ npm run dev
 # or
 yarn dev
 
+exit
+
 Open http://localhost:3000 in your browser.
 
 **Note:** When running in development mode, you'll see a Next.js development indicator icon in the bottom-right corner. This is normal and only appears during local development - it won't be visible in production.
