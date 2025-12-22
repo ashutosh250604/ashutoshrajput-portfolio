@@ -38,7 +38,7 @@ export default function Footer() {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-500">
-            Designed by Ashutosh Rajput
+            Built by Ashutosh Rajput
           </p>
         </div>
       </div>
