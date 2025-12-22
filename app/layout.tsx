@@ -3,6 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ScrollTop from '@/components/ScrollTop'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 
 export const metadata: Metadata = {
   title: 'Ashutosh Rajput | Full Stack Developer',
@@ -23,17 +24,20 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning translate="no">
       <head>
         <link rel="icon" href="/favicon.ico" />
+        <meta name="google" content="notranslate" />
       </head>
-      <body className="antialiased">
-        <Navbar />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
-        <ScrollTop />
+      <body className="antialiased notranslate">
+        <LanguageProvider>
+          <Navbar />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+          <ScrollTop />
+        </LanguageProvider>
       </body>
     </html>
   )

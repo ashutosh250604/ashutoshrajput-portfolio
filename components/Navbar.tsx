@@ -3,29 +3,37 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ThemeToggle from './ThemeToggle'
+import LanguageToggle from './LanguageToggle'
 import MobileNav from './MobileNav'
 import { Menu } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
-const navLinks = [
-  { name: 'Home', href: '#home' },
-  { name: 'About', href: '#about' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Experience', href: '#experience' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Contact', href: '#contact' },
+const navKeys = [
+  { key: 'nav.home', href: '#home' },
+  { key: 'nav.about', href: '#about' },
+  { key: 'nav.projects', href: '#projects' },
+  { key: 'nav.experience', href: '#experience' },
+  { key: 'nav.skills', href: '#skills' },
+  { key: 'nav.contact', href: '#contact' },
 ]
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  const { t } = useLanguage()
+
+  const navLinks = navKeys.map(item => ({
+    name: t(item.key),
+    href: item.href
+  }))
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
 
       // Update active section based on scroll position
-      const sections = navLinks.map(link => link.href.replace('#', ''))
+      const sections = navKeys.map(link => link.href.replace('#', ''))
       for (const section of sections) {
         const element = document.getElementById(section)
         if (element) {
@@ -79,9 +87,10 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Right Side - Theme Toggle & Mobile Menu */}
-            <div className="flex items-center space-x-4">
+            {/* Right Side - Theme Toggle, Language Toggle & Mobile Menu */}
+            <div className="flex items-center space-x-2">
               <ThemeToggle />
+              <LanguageToggle />
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
                 className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

@@ -1,6 +1,7 @@
 'use client'
 
 import { Github, ExternalLink } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface ProjectCardProps {
   project: {
@@ -16,6 +17,16 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, index }: ProjectCardProps) {
+  const { t } = useLanguage()
+  
+  // Get translated title and description, fallback to original if not found
+  const translatedTitle = t(`project.${project.id}.title`) !== `project.${project.id}.title` 
+    ? t(`project.${project.id}.title`) 
+    : project.title
+  const translatedDescription = t(`project.${project.id}.description`) !== `project.${project.id}.description`
+    ? t(`project.${project.id}.description`)
+    : project.description
+
   return (
     <div
       className="group glass rounded-xl p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-slide-up"
@@ -57,10 +68,10 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
       <div className="space-y-4">
         <div>
           <h3 className="text-xl font-bold mb-2 group-hover:text-primary-500 transition-colors">
-            {project.title}
+            {translatedTitle}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-            {project.description}
+            {translatedDescription}
           </p>
         </div>
 

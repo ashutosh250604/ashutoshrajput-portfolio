@@ -1,12 +1,17 @@
+'use client'
+
+import { useLanguage } from '@/contexts/LanguageContext'
+
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { t } = useLanguage()
 
   return (
     <footer className="bg-gray-50 dark:bg-gray-900/50 py-8 px-4 border-t border-gray-200 dark:border-gray-800">
       <div className="container mx-auto max-w-6xl">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-600 dark:text-gray-400 text-sm text-center md:text-left">
-            © {currentYear} | Built with Next.js & Tailwind CSS
+            © {currentYear} | {t('footer.builtWith')}
           </p>
           
           <div className="flex gap-6">
@@ -31,14 +36,14 @@ export default function Footer() {
               download
               className="text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors text-sm"
             >
-              Resume
+              {t('hero.resume')}
             </a>
           </div>
         </div>
 
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-500">
-            Built by Ashutosh Rajput
+            {t('footer.builtBy')}
           </p>
         </div>
       </div>

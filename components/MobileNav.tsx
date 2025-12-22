@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { X } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface MobileNavProps {
   isOpen: boolean
@@ -12,6 +13,8 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ isOpen, onClose, navLinks, activeSection }: MobileNavProps) {
+  const { t } = useLanguage()
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -46,7 +49,7 @@ export default function MobileNav({ isOpen, onClose, navLinks, activeSection }: 
         <nav className="mt-12 flex flex-col space-y-2">
           {navLinks.map((link) => (
             <Link
-              key={link.name}
+              key={link.href}
               href={link.href}
               onClick={onClose}
               className={`px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -66,7 +69,7 @@ export default function MobileNav({ isOpen, onClose, navLinks, activeSection }: 
             download
             className="block w-full px-4 py-3 text-center bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-semibold"
           >
-            Download Resume
+            {t('mobileNav.downloadResume')}
           </a>
         </div>
       </div>

@@ -1,21 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Image from 'next/image'
 import SocialBar from './SocialBar'
 import { Download, ArrowDown } from 'lucide-react'
-
-const roles = [
-  'Full Stack Developer',
-  'Backend Developer',
-  'Software Developer',
-  'Web Developer'
-]
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Hero() {
+  const { t } = useLanguage()
   const [currentRole, setCurrentRole] = useState(0)
   const [displayedText, setDisplayedText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const roles = useMemo(() => [
+    t('hero.role.fullstack'),
+    t('hero.role.backend'),
+    t('hero.role.software'),
+    t('hero.role.web')
+  ], [t])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -38,7 +40,7 @@ export default function Hero() {
     }, isDeleting ? 50 : 100)
 
     return () => clearTimeout(timeout)
-  }, [displayedText, isDeleting, currentRole])
+  }, [displayedText, isDeleting, currentRole, roles])
 
   return (
     <section id="home" className="min-h-screen flex items-center justify-center pt-20 px-4">
@@ -47,7 +49,7 @@ export default function Hero() {
           {/* Left Content */}
           <div className="space-y-6 animate-slide-up">
             <div className="space-y-2">
-              <p className="text-lg text-gray-600 dark:text-gray-400">Hi, I am</p>
+              <p className="text-lg text-gray-600 dark:text-gray-400">{t('hero.greeting')}</p>
               <h1 className="text-5xl md:text-6xl font-bold">
                 <span className="">Ashutosh Rajput</span>
               </h1>
@@ -60,8 +62,7 @@ export default function Hero() {
             </div>
 
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-xl">
-              I am a passionate developer who crafts elegant solutions to complex problems.
-              Focussed on building scalable web apps with modern technologies.
+              {t('hero.description')}
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -69,7 +70,7 @@ export default function Hero() {
                 href="#contact"
                 className="px-8 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all hover:shadow-lg hover:scale-105 font-semibold"
               >
-                Get In Touch
+                {t('hero.cta')}
               </a>
               <a
                 href="/resume.pdf"
@@ -77,7 +78,7 @@ export default function Hero() {
                 className="px-8 py-3 glass rounded-lg hover:shadow-lg transition-all hover:scale-105 font-semibold flex items-center gap-2"
               >
                 <Download className="w-5 h-5" />
-                Resume
+                {t('hero.resume')}
               </a>
             </div>
 
@@ -104,7 +105,7 @@ export default function Hero() {
 
               {/* Floating badge */}
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-full backdrop-blur-xl">
-                <p className="font-semibold whitespace-nowrap">Open to Work</p>
+                <p className="font-semibold whitespace-nowrap">{t('hero.openToWork')}</p>
               </div>
             </div>
           </div>

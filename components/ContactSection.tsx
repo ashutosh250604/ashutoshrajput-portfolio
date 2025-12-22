@@ -1,18 +1,23 @@
+'use client'
+
 import { Mail, MapPin, Phone } from 'lucide-react'
 import SocialBar from './SocialBar'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ContactSection() {
+  const { t } = useLanguage()
+
   return (
     <section id="contact" className="py-20 px-4">
       <div className="container mx-auto max-w-4xl">
         <div className="space-y-12 animate-slide-up">
           <div className="text-center space-y-4">
             <h2 className="text-4xl md:text-5xl font-bold">
-              Get In <span className="gradient-text">Touch</span>
+              {t('contact.title')} <span className="gradient-text">{t('contact.title.highlight')}</span>
             </h2>
             <div className="w-20 h-1 bg-gradient-to-r from-primary-500 to-purple-500 mx-auto rounded-full" />
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
-              I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
+              {t('contact.subtitle')}
             </p>
           </div>
 
@@ -20,7 +25,7 @@ export default function ContactSection() {
             {/* Contact Info */}
             <div className="space-y-6">
               <div className="glass rounded-xl p-8 space-y-6 hover:shadow-xl transition-all">
-                <h3 className="text-2xl font-bold mb-4">Let's Connect</h3>
+                <h3 className="text-2xl font-bold mb-4">{t('contact.connect')}</h3>
                 
                 <a
                   href="mailto:ashutoshrajput2506@gmail.com"
@@ -30,7 +35,7 @@ export default function ContactSection() {
                     <Mail className="w-6 h-6 text-primary-500" />
                   </div>
                   <div>
-                    <p className="font-semibold mb-1">Email</p>
+                    <p className="font-semibold mb-1">{t('contact.email')}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       ashutoshrajput2506atgmaildotcom
                     </p>
@@ -42,16 +47,16 @@ export default function ContactSection() {
                     <MapPin className="w-6 h-6 text-primary-500" />
                   </div>
                   <div>
-                    <p className="font-semibold mb-1">Location</p>
+                    <p className="font-semibold mb-1">{t('contact.location')}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      India
+                      {t('contact.locationValue')}
                     </p>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Ping me on social media
+                    {t('contact.social')}
                   </p>
                   <SocialBar />
                 </div>
@@ -66,9 +71,9 @@ export default function ContactSection() {
                 </div>
                 
                 <div>
-                  <h3 className="text-2xl font-bold mb-2">Let's Connect !</h3>
+                  <h3 className="text-2xl font-bold mb-2">{t('contact.cta')}</h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Whether you have a question or just want to say hi, I'll get back to you in a second 😅!
+                    {t('contact.ctaDescription')}
                   </p>
                 </div>
 
@@ -76,7 +81,7 @@ export default function ContactSection() {
                   href="mailto:ashutoshrajput2506@gmail.com?subject=Let's%20Connect"
                   className="inline-block px-8 py-4 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all hover:shadow-lg hover:scale-105 font-semibold"
                 >
-                  Send Me an Email
+                  {t('contact.sendEmail')}
                 </a>
 
                 <a
@@ -84,7 +89,7 @@ export default function ContactSection() {
                   download
                   className="inline-block px-8 py-3 glass rounded-lg hover:shadow-lg transition-all hover:scale-105 font-semibold"
                 >
-                  Download Resume
+                  {t('mobileNav.downloadResume')}
                 </a>
               </div>
             </div>
