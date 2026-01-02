@@ -16,12 +16,12 @@ export default [
     featured: true
   },
   {
-    id: 'wallet-app',
-    title: 'Digital Wallet & UPI System',
-    description: 'Secure wallet application with UPI integration, transaction history, and real-time balance updates using Python Flask backend.',
-    tech: ['React', 'Python', 'Flask', 'PostgreSQL', 'Vite'],
-    github: 'https://github.com/ashutosh250604/upi-wallet-app',
-    featured: true
+    id: 'portfolio',
+    title: 'Developer Portfolio',
+    description: 'Modern portfolio built with Next.js featuring dark mode, smooth animations, and responsive design to showcase projects and skills.',
+    tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'React'],
+    github: 'https://github.com/ashutosh250604/ashutoshrajput-portfolio',
+    featured: false
   },
   {
     id: 'qr-monitor',
@@ -31,6 +31,7 @@ export default [
     github: 'https://github.com/ashutosh250604/qr-monitor',
     featured: true
   },
+
   {
     id: 'card-game',
     title: '7-8 Strategic Card Game',
@@ -40,11 +41,12 @@ export default [
     featured: false
   },
   {
-    id: 'portfolio',
-    title: 'Developer Portfolio',
-    description: 'Modern portfolio built with Next.js featuring dark mode, smooth animations, and responsive design to showcase projects and skills.',
-    tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'React'],
-    github: 'https://github.com/ashutosh250604/ashutoshrajput-portfolio',
-    featured: false
+    id: 'wallet-app',
+    title: 'Digital Wallet & UPI System',
+    description: 'Secure wallet application with UPI integration, transaction history, and real-time balance updates using Python Flask backend.',
+    tech: ['React', 'Python', 'Flask', 'PostgreSQL', 'Vite'],
+    github: 'https://github.com/ashutosh250604/upi-wallet-app',
+    featured: true
   }
+
 ]
