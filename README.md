@@ -1,6 +1,6 @@
 # Ashutosh Rajput - Portfolio Website
 
-A modern, responsive portfolio website built with Next.js, TypeScript, and Tailwind CSS.
+Modern, responsive portfolio website built with Next.js, TypeScript, and Tailwind CSS.
 
 https://ashutoshrajput-portfolio.vercel.app/
 
