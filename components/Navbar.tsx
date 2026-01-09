@@ -63,7 +63,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link 
-              href="#home" 
+              href="/" 
               className="text-2xl font-bold gradient-text hover:scale-105 transition-transform"
               aria-label="Home"
             >
