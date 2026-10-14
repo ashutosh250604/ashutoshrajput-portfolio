@@ -1,111 +1,128 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import LanguageToggle from './LanguageToggle'
 import MobileNav from './MobileNav'
-import { Menu } from 'lucide-react'
+import { openPalette } from './CommandPalette'
+import { Menu, Search } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
-const navKeys = [
-  { key: 'nav.home', href: '#home' },
-  { key: 'nav.about', href: '#about' },
-  { key: 'nav.projects', href: '#projects' },
-  { key: 'nav.experience', href: '#experience' },
-  { key: 'nav.skills', href: '#skills' },
-  { key: 'nav.contact', href: '#contact' },
+const navItems = [
+  { key: 'nav.home', href: '#home', index: '' },
+  { key: 'nav.about', href: '#about', index: '01' },
+  { key: 'nav.projects', href: '#projects', index: '02' },
+  { key: 'nav.experience', href: '#experience', index: '03' },
+  { key: 'nav.skills', href: '#skills', index: '04' },
+  { key: 'nav.contact', href: '#contact', index: '05' },
 ]
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
   const { t } = useLanguage()
 
-  const navLinks = navKeys.map(item => ({
+  const navLinks = navItems.map((item) => ({
     name: t(item.key),
-    href: item.href
+    href: item.href,
+    index: item.index,
   }))
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
+    const targets = navItems
+      .map((item) => document.getElementById(item.href.slice(1)))
+      .filter((element): element is HTMLElement => Boolean(element))
 
-      // Update active section based on scroll position
-      const sections = navKeys.map(link => link.href.replace('#', ''))
-      for (const section of sections) {
-        const element = document.getElementById(section)
-        if (element) {
-          const rect = element.getBoundingClientRect()
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            setActiveSection(section)
-            break
-          }
-        }
-      }
+    // One observer instead of reading layout on every scroll event.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (visible) setActiveSection(visible.target.id)
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
+    )
+
+    targets.forEach((target) => observer.observe(target))
+
+    const onScroll = () => setIsScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', onScroll)
     }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'glass shadow-lg py-4'
-            : 'bg-transparent py-6'
+        className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
+          isScrolled ? 'border-rule/15 bg-paper/85 backdrop-blur-sm' : 'border-transparent bg-transparent'
         }`}
       >
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link 
-              href="/" 
-              className="text-2xl font-bold gradient-text hover:scale-105 transition-transform"
-              aria-label="Home"
-            >
-              AR.
-            </Link>
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 border-x border-rule/15 px-5 sm:h-16 sm:px-8">
+          <Logo />
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
-              {navLinks.map((link) => (
+          <div className="hidden items-center gap-0.5 md:flex">
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.href.slice(1)
+              return (
                 <Link
-                  key={link.name}
+                  key={link.href}
                   href={link.href}
-                  className={`px-4 py-2 rounded-lg transition-all duration-200 ${
-                    activeSection === link.href.replace('#', '')
-                      ? 'text-primary-500 bg-primary-500/10'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  aria-current={isActive ? 'true' : undefined}
+                  className={`flex items-baseline gap-1.5 rounded-sm px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                    isActive ? 'text-accent' : 'text-muted hover:text-ink'
                   }`}
                 >
+                  {/* No extra opacity: muted is already 5:1 on the paper, and
+                      dimming it further took these numbers to 2.4:1. */}
+                  {link.index ? <span className="tabular text-[9px] text-muted">{link.index}</span> : null}
                   {link.name}
                 </Link>
-              ))}
-            </div>
+              )
+            })}
+          </div>
 
-            {/* Right Side - Theme Toggle, Language Toggle & Mobile Menu */}
-            <div className="flex items-center space-x-2">
-              <ThemeToggle />
-              <LanguageToggle />
-              <button
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Open menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={openPalette}
+              aria-label={t('a11y.openPalette')}
+              className="hidden items-center gap-2 rounded-sm border border-rule/20 px-2.5 py-1.5 font-mono text-[11px] text-muted transition-colors hover:border-accent hover:text-accent sm:flex"
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span className="tabular">⌘K</span>
+            </button>
+            <ThemeToggle />
+            <LanguageToggle />
+            <button
+              ref={menuButtonRef}
+              type="button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="rounded-sm p-2 transition-colors hover:text-accent md:hidden"
+              aria-label={t('a11y.openMenu')}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </nav>
 
-      <MobileNav 
-        isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)}
+      <MobileNav
+        isOpen={isMobileMenuOpen}
+        // Send focus back to the hamburger, where it came from.
+        onClose={() => {
+          setIsMobileMenuOpen(false)
+          menuButtonRef.current?.focus()
+        }}
         navLinks={navLinks}
         activeSection={activeSection}
       />

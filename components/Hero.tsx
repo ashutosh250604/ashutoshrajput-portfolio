@@ -1,10 +1,30 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import Image from 'next/image'
-import SocialBar from './SocialBar'
 import { Download, ArrowDown } from 'lucide-react'
+import { socials } from '@/data/socials'
 import { useLanguage } from '@/contexts/LanguageContext'
+
+/**
+ * The four buttons sit on the outer ring at the diagonals, clockwise from the
+ * top left. 20%/80% of the plate puts each centre on a radius of about 42% of
+ * the width — the same radius as the ring they ride on (inset 8%), so they read
+ * as nodes on a wire instead of dots floating in the margin.
+ */
+const orbitPositions = [
+  'left-[20%] top-[20%]',
+  'left-[80%] top-[20%]',
+  'left-[80%] top-[80%]',
+  'left-[20%] top-[80%]',
+]
+
+/** Labels sit outside the ring: above the top pair, below the bottom pair. */
+const labelPositions = [
+  'bottom-full mb-1.5',
+  'bottom-full mb-1.5',
+  'top-full mt-1.5',
+  'top-full mt-1.5',
+]
 
 export default function Hero() {
   const { t } = useLanguage()
@@ -22,7 +42,7 @@ export default function Hero() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       const currentFullText = roles[currentRole]
-      
+
       if (!isDeleting) {
         if (displayedText.length < currentFullText.length) {
           setDisplayedText(currentFullText.slice(0, displayedText.length + 1))
@@ -43,80 +63,145 @@ export default function Hero() {
   }, [displayedText, isDeleting, currentRole, roles])
 
   return (
-    <section id="home" className="min-h-[100dvh] flex items-center justify-center pt-16 pb-8 sm:pt-20 sm:pb-0 px-3 sm:px-4 overflow-hidden relative">
+    <section id="home" className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-3 pb-8 pt-16 sm:px-4 sm:pb-0 sm:pt-20">
       <div className="container mx-auto max-w-6xl">
-        <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
+        <div className="grid items-center gap-8 sm:gap-10 md:grid-cols-2 md:gap-12">
           {/* Left Content */}
-          <div className="space-y-4 sm:space-y-6 animate-slide-up order-2 md:order-1 text-center md:text-left">
+          <div className="order-2 space-y-4 text-center animate-slide-up sm:space-y-6 md:order-1 md:text-left">
             <div className="space-y-2">
-              <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400">{t('hero.greeting')}</p>
-              <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold break-words">
-                <span className="">Ashutosh Rajput</span>
+              <p className="text-sm text-muted sm:text-base md:text-lg">{t('hero.greeting')}</p>
+              <h1 className="break-words text-2xl font-bold xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
+                <span>{t('hero.name')}</span>
               </h1>
-              <div className="h-8 sm:h-10 md:h-12 flex items-center justify-center md:justify-start">
-                <p className="text-base sm:text-lg md:text-2xl lg:text-3xl font-semibold text-primary-500">
+              <div className="flex h-8 items-center justify-center sm:h-10 md:h-12 md:justify-start">
+                <p className="text-base font-semibold text-accent sm:text-lg md:text-2xl lg:text-3xl">
                   {displayedText}
                   <span className="animate-pulse">|</span>
                 </p>
               </div>
             </div>
 
-            <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-xl mx-auto md:mx-0">
+            <p className="mx-auto max-w-xl text-sm text-ink/80 sm:text-base md:mx-0 md:text-lg">
               {t('hero.description')}
             </p>
 
-            <div className="flex flex-wrap gap-3 sm:gap-4 justify-center md:justify-start">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:justify-start">
               <a
                 href="#contact"
-                className="px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-all hover:shadow-lg hover:scale-105 font-semibold text-xs sm:text-sm md:text-base"
+                className="rounded-sm bg-accent px-4 py-2 text-xs font-semibold text-accent-on transition-all hover:scale-105 hover:bg-accent-strong hover:shadow-lg sm:px-6 sm:py-2.5 sm:text-sm md:px-8 md:py-3 md:text-base"
               >
                 {t('hero.cta')}
               </a>
               <a
                 href="/resume.pdf"
                 download
-                className="px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3 glass rounded-lg hover:shadow-lg transition-all hover:scale-105 font-semibold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base"
+                className="glass flex items-center gap-1.5 rounded-sm px-4 py-2 text-xs font-semibold transition-all hover:scale-105 hover:shadow-lg sm:gap-2 sm:px-6 sm:py-2.5 sm:text-sm md:px-8 md:py-3 md:text-base"
               >
-                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                 {t('hero.resume')}
               </a>
             </div>
-
-            <div className="flex justify-center md:justify-start">
-              <SocialBar />
-            </div>
           </div>
 
-          {/* Right Content - Avatar Card */}
-          <div className="flex justify-center animate-fade-in order-1 md:order-2">
-            <div className="relative group">
-              {/* Decorative elements */}
-              <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full blur-xl sm:blur-2xl opacity-20 group-hover:opacity-30 transition-opacity" />
-              
-              <div className="relative glass rounded-full p-1.5 sm:p-2 hover:shadow-2xl transition-all duration-300">
-                <div className="relative w-32 h-32 xs:w-40 xs:h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 rounded-full overflow-hidden border-2 sm:border-4 border-white/20">
-                  <Image
+          {/* Right Content — the portrait, set as a plate with the links on its ring */}
+          <div className="order-1 flex flex-col items-center animate-fade-in md:order-2">
+            <div className="relative flex h-60 w-60 items-center justify-center xs:h-64 xs:w-64 sm:h-72 sm:w-72 lg:h-[22rem] lg:w-[22rem]">
+              {/* halo, barely there */}
+              <span aria-hidden className="absolute inset-[16%] rounded-full bg-accent/[0.07] blur-2xl" />
+
+              {/* the ring the buttons ride on */}
+              <span
+                aria-hidden
+                className="absolute inset-[8%] rounded-full border border-dashed border-rule/30"
+              />
+              {/* hairline just clear of the portrait */}
+              <span aria-hidden className="absolute inset-[14%] rounded-full border border-rule/20" />
+              {/* one accent tick, slowly circling the portrait */}
+              <span aria-hidden className="absolute inset-[8%] animate-orbit">
+                <span className="absolute left-1/2 top-0 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-accent" />
+              </span>
+
+              {/**
+               * The artwork is a dark scene, so a hard circular cut reads as a
+               * sticker pasted on the page. Scaling it slightly past the frame
+               * crops the illustration's own dark border, and the paper-toned
+               * vignette over the rim fades it into the page — in either theme,
+               * because it is drawn in the paper token rather than the artwork's
+               * black.
+               */}
+              <div className="relative h-[66%] w-[66%] overflow-hidden rounded-full bg-paper">
+                {/*
+                 * 512px source for a 232px plate: enough for a 2x screen, small
+                 * enough to be a rounding error next to what the page used to
+                 * download. WebP first, JPEG for anything that cannot read it.
+                 */}
+                <picture>
+                  <source srcSet="/avatar.webp" type="image/webp" />
+                  <img
                     src="/avatar.jpg"
                     alt="Ashutosh Rajput"
-                    fill
-                    className="object-cover"
-                    priority
+                    width={512}
+                    height={512}
+                    loading="eager"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full scale-105 object-cover object-center"
                   />
-                </div>
+                </picture>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-full"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgb(var(--paper) / 0) 62%, rgb(var(--paper) / 0.55) 84%, rgb(var(--paper)) 100%)',
+                  }}
+                />
               </div>
 
-              {/* Floating badge */}
-              <div className="absolute -bottom-2 sm:-bottom-3 md:-bottom-4 left-1/2 -translate-x-1/2 glass px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 rounded-full backdrop-blur-xl">
-                <p className="font-medium sm:font-semibold whitespace-nowrap text-xs sm:text-sm md:text-base">{t('hero.openToWork')}</p>
-              </div>
+              {socials.map((social, index) => {
+                const Icon = social.icon
+                const isExternal = social.url.startsWith('http')
+                return (
+                  <a
+                    key={social.name}
+                    href={social.url}
+                    target={isExternal ? '_blank' : undefined}
+                    rel={isExternal ? 'noopener noreferrer' : undefined}
+                    aria-label={social.name}
+                    title={social.name}
+                    className={`group absolute -translate-x-1/2 -translate-y-1/2 ${orbitPositions[index % orbitPositions.length]} grid h-8 w-8 place-items-center rounded-full border border-rule/30 bg-paper text-muted transition-all duration-200 hover:scale-110 hover:border-accent hover:text-accent sm:h-9 sm:w-9`}
+                  >
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span
+                      className={`pointer-events-none absolute left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-sm border border-rule/20 bg-paper px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 sm:block ${labelPositions[index % labelPositions.length]}`}
+                    >
+                      {social.name}
+                    </span>
+                  </a>
+                )
+              })}
+            </div>
+
+            {/* the plaque under the plate */}
+            <div className="mt-6 flex items-center gap-2 rounded-sm border border-rule/20 bg-paper px-3 py-1.5 sm:mt-8">
+              <span aria-hidden className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/80">
+                {t('hero.openToWork')}
+              </span>
+              <span aria-hidden className="h-3 w-px bg-rule/20" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
+                {t('contact.locationValue')}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <a href="#about" aria-label="Scroll to about section">
-            <ArrowDown className="w-6 h-6 text-gray-400" />
+        <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 animate-bounce sm:block">
+          <a href="#about" aria-label={t('hero.scroll')}>
+            <ArrowDown className="h-6 w-6 text-muted" />
           </a>
         </div>
       </div>

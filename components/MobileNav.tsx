@@ -1,77 +1,93 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Logo from './Logo'
 import { X } from 'lucide-react'
+import { lockScroll, unlockScroll } from '@/lib/scrollLock'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 interface MobileNavProps {
   isOpen: boolean
   onClose: () => void
-  navLinks: { name: string; href: string }[]
+  navLinks: { name: string; href: string; index: string }[]
   activeSection: string
 }
 
 export default function MobileNav({ isOpen, onClose, navLinks, activeSection }: MobileNavProps) {
   const { t } = useLanguage()
+  const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
+    if (!isOpen) return
+
+    lockScroll()
+    closeRef.current?.focus()
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
     }
+
+    document.addEventListener('keydown', onKeyDown)
+
     return () => {
-      document.body.style.overflow = 'unset'
+      document.removeEventListener('keydown', onKeyDown)
+      unlockScroll()
     }
-  }, [isOpen])
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
-      
-      {/* Menu Panel */}
-      <div className="absolute right-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-900 shadow-2xl animate-slide-in-right p-6">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          aria-label="Close menu"
-        >
-          <X className="w-6 h-6" />
-        </button>
+    <div className="fixed inset-0 z-[70] md:hidden">
+      <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={onClose} />
 
-        <nav className="mt-12 flex flex-col space-y-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={onClose}
-              className={`px-4 py-3 rounded-lg transition-all duration-200 ${
-                activeSection === link.href.replace('#', '')
-                  ? 'text-primary-500 bg-primary-500/10 font-semibold'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              {link.name}
-            </Link>
-          ))}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('a11y.openMenu')}
+        className="absolute inset-y-0 right-0 flex w-72 max-w-[85vw] animate-slide-in-right flex-col border-l border-rule/15 bg-paper px-5 py-5"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <Logo compact />
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            className="rounded-sm p-2 transition-colors hover:text-accent"
+            aria-label={t('a11y.closeMenu')}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <nav className="mt-8 flex flex-col">
+          {navLinks.map((link) => {
+            const isActive = activeSection === link.href.slice(1)
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={onClose}
+                aria-current={isActive ? 'true' : undefined}
+                className={`flex items-baseline gap-3 border-b border-rule/15 py-3 font-mono text-xs uppercase tracking-[0.14em] transition-colors ${
+                  isActive ? 'text-accent' : 'text-muted hover:text-ink'
+                }`}
+              >
+                <span className="tabular text-[9px] text-muted">{link.index || '00'}</span>
+                {link.name}
+              </Link>
+            )
+          })}
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6">
-          <a
-            href="/resume.pdf"
-            download
-            className="block w-full px-4 py-3 text-center bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-semibold"
-          >
-            {t('mobileNav.downloadResume')}
-          </a>
-        </div>
+        <a
+          href="/resume.pdf"
+          download
+          className="mt-auto block rounded-sm bg-ink px-4 py-2.5 text-center font-mono text-xs text-paper transition-opacity hover:opacity-85"
+        >
+          {t('mobileNav.downloadResume')}
+        </a>
       </div>
     </div>
   )

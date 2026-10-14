@@ -30,14 +30,54 @@ const config: Config = {
           800: '#075985',
           900: '#0c4a6e',
         },
+        // Editorial tokens, resolved from CSS variables so one class works in
+        // both themes (see app/globals.css).
+        paper: 'rgb(var(--paper) / <alpha-value>)',
+        ink: 'rgb(var(--ink) / <alpha-value>)',
+        muted: 'rgb(var(--muted) / <alpha-value>)',
+        rule: 'rgb(var(--rule) / <alpha-value>)',
+        //
+        // `accent` is the one accent, tuned per theme so it is legible in both
+        // roles it plays: as text on the paper (>= 4.5:1) and as a fill with
+        // `accent-on` on top of it (>= 4.5:1). Never use primary-500/600 for
+        // text — that is what failed the contrast audit.
+        accent: {
+          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+          strong: 'rgb(var(--accent-strong) / <alpha-value>)',
+          on: 'rgb(var(--on-accent) / <alpha-value>)',
+        },
       },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        // The families are self-hosted by next/font and exposed as variables
+        // (see app/layout.tsx); the named fallbacks cover the case where the
+        // variables are missing.
+        sans: [
+          'var(--font-sans)',
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'sans-serif',
+        ],
+        mono: [
+          'var(--font-mono)',
+          'JetBrains Mono',
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Consolas',
+          'monospace',
+        ],
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.5s ease-out',
-        'slide-down': 'slideDown 0.3s ease-out',
+        'fade-in': 'fadeIn 0.4s ease-out',
+        'slide-up': 'slideUp 0.4s ease-out',
+        'slide-down': 'slideDown 0.15s ease-out',
+        'slide-in-right': 'slideInRight 0.25s ease-out',
+        'card-in': 'cardIn 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both',
+        'orbit': 'orbit 90s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -45,20 +85,25 @@ const config: Config = {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '0%': { transform: 'translateY(12px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         slideDown: {
-          '0%': { transform: 'translateY(-10px)', opacity: '0' },
+          '0%': { transform: 'translateY(-6px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-      },
-      backdropBlur: {
-        xs: '2px',
+        slideInRight: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        cardIn: {
+          '0%': { transform: 'translateY(16px) scale(0.96)', opacity: '0' },
+          '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+        },
+        orbit: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
       },
     },
   },

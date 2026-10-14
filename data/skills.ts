@@ -1,37 +1,12 @@
+/**
+ * Grouped by where the work happens, not by what the resume used to say:
+ * Python and SQL first, then what I have built with, then the tools I reach for
+ * to ship it.
+ */
 export default {
-  frontend: [
-    'HTML5',
-    'CSS3',
-    'JavaScript',
-    'React',
-    'Next.js',
-    'Tailwind CSS',
-    'Bootstrap',
-    'Responsive Design'
-  ],
-  backend: [
-    'Node.js',
-    'Express.js',
-    'Python',
-    'RESTful APIs',
-    'Authentication'
-  ],
-  database: [
-    'MongoDB',
-    'MySQL',
-    'PostgreSQL',
-    'MongoDB Atlas',
-    'SQLYog'
-  ],
-  tools: [
-    'Git',
-    'GitHub',
-    'VS Code',
-    'Postman',
-    'Google Cloud',
-    'Vercel',
-    'npm/yarn',
-    'Stripe',
-
-  ]
+  languages: ['Python', 'Java', 'JavaScript', 'TypeScript', 'SQL'],
+  backend: ['Flask', 'REST APIs', 'SQLAlchemy', 'Jinja2', 'JWT auth'],
+  database: ['PostgreSQL', 'SQLite', 'MySQL'],
+  frontend: ['React', 'Next.js', 'Tailwind CSS', 'HTML5', 'CSS3'],
+  tools: ['Git', 'GitHub', 'Docker', 'Linux', 'VS Code', 'Postman', 'Render', 'Vercel'],
 }

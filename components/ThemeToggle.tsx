@@ -1,40 +1,52 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sun, Moon } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+
+/**
+ * Both classes, not just `dark`: with no JavaScript the stylesheet falls back to
+ * the system preference, so an explicit choice of light on a dark system has to
+ * be recorded as a class for it to beat that media query.
+ */
+function apply(theme: 'light' | 'dark') {
+  const classes = document.documentElement.classList
+  classes.toggle('dark', theme === 'dark')
+  classes.toggle('light', theme === 'light')
+}
 
 export default function ThemeToggle() {
+  const { t } = useLanguage()
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
-    // Check for saved theme preference or default to system
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
+    // The pre-paint script in layout.tsx has already decided the theme, so
+    // this only syncs the button's own state with it.
+    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light')
-    setTheme(initialTheme)
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark')
+    const initial = saved ?? (prefersDark ? 'dark' : 'light')
+
+    apply(initial)
   }, [])
 
+  const label = theme === 'light' ? t('a11y.switchToDark') : t('a11y.switchToLight')
+
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
-    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    const next = theme === 'light' ? 'dark' : 'light'
+    setTheme(next)
+    localStorage.setItem('theme', next)
+    apply(next)
   }
 
   return (
     <button
+      type="button"
       onClick={toggleTheme}
-      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      aria-pressed={theme === 'dark'}
+      aria-label={label}
+      title={label}
+      className="rounded-sm border border-rule/20 p-2 transition-colors hover:border-accent hover:text-accent"
     >
-      {theme === 'light' ? (
-        <Moon className="w-5 h-5" />
-      ) : (
-        <Sun className="w-5 h-5" />
-      )}
+      {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
     </button>
   )
 }

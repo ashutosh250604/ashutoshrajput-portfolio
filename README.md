@@ -76,6 +76,29 @@ Open http://localhost:3000 in your browser.
 
 **Note:** When running in development mode, you'll see a Next.js development indicator icon in the bottom-right corner. This is normal and only appears during local development - it won't be visible in production.
 
+### Resume
+
+`public/resume.pdf` is generated, not hand-edited. It is a print of the `/resume` route, which reads the same `data/` files as the portfolio, so the sheet cannot drift away from the site:
+
+```bash
+npm run resume        # build, then print /resume to public/resume.pdf
+npm run resume:only   # print from the existing out/ build
+```
+
+The script renders the page with headless Chrome or Edge (set `CHROME_PATH` if neither is found) and fails unless the result is one A4 page containing the expected text and none of the page furniture.
+
+### Checking the build
+
+```bash
+npm run check                 # translations, key coverage, and AA contrast for every theme
+npm run images                # re-cut avatar.jpg to the sizes the page actually uses
+node scripts/audit-page.cjs   # serves out/ and measures it in headless Chrome
+```
+
+`npm run check` includes `scripts/check-contrast.cjs`, which measures the theme tokens arithmetically (text at 4.5:1, control fills at 3:1) and fails if the `.dark` block and the no-JavaScript `prefers-color-scheme` block drift apart.
+
+`scripts/audit-page.cjs` reports first paint, largest contentful paint, layout shift, every request with its transfer size, and whether the skip link comes on screen when focused. Run it before and after a change to compare; the byte counts are exact, the timings are virtual-time and meant for comparison rather than as a prediction.
+
 📄 License
 This project is open source and available under the MIT License.
 

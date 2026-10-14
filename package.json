@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check": "node scripts/check-translations.cjs && node scripts/check-keys.cjs && node scripts/check-contrast.cjs",
+    "images": "node scripts/optimize-images.cjs",
+    "resume": "next build && node scripts/make-resume.cjs",
+    "resume:only": "node scripts/make-resume.cjs"
   },
   "dependencies": {
     "next": "^15.1.0",

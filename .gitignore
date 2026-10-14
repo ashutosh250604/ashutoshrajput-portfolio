@@ -35,3 +35,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local agent scratch space
+.freebuff/
+
+# copies of pre-existing source files kept for diffing
+.resume-backup/

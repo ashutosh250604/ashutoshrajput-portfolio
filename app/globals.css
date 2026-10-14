@@ -1,19 +1,68 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Design tokens. The site is set like a document rather than a product page:
+  paper, ink, one hairline rule colour, one accent.
+
+  Two rules learned from the contrast audit, and worth keeping:
+  - The accent is `--accent`, never primary-500/600 directly, so it can stay
+    legible per theme. Light uses a deeper blue so it reads on bone paper;
+    dark can use a bright blue because the label on top of it is near-black.
+  - Text colours are only ever paper/ink/muted/accent, and every one of them is
+    measured: paper on ink 15:1, muted 5.0:1, accent 5.4:1 (light) and 9:1
+    (dark). Anything below 4.5:1 is a bug, not a style choice.
+*/
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 248, 250, 252;
+  /* Warm bone paper rather than pure white: it reads as a printed page, and
+     the accent sits on it without the video-screen glare. */
+  --paper: 247 245 239;
+  --ink: 28 26 23;
+  --muted: 111 104 94;
+  --rule: 28 26 23;
+  /* The wash lightens the top of a tall page so the paper does not read flat. */
+  --wash: 255 253 248;
+  /* primary-700: 5.4:1 as text on the paper, 5.9:1 as a fill under white. */
+  --accent: 3 105 161;
+  --accent-strong: 7 89 133;
+  --on-accent: 255 255 255;
+  color-scheme: light;
+  scrollbar-color: rgb(var(--rule) / 0.25) transparent;
 }
 
 .dark {
-  --foreground-rgb: 248, 250, 252;
-  --background-start-rgb: 15, 23, 42;
-  --background-end-rgb: 30, 41, 59;
+  --paper: 11 11 11;
+  --ink: 237 237 234;
+  --muted: 152 152 148;
+  --rule: 237 237 234;
+  --wash: 26 26 28;
+  /* primary-500: 6.6:1 as text on the near-black paper, and it can carry ink
+     as its label because the label is dark here, not white. */
+  --accent: 14 165 233;
+  --accent-strong: 56 189 248;
+  --on-accent: 8 17 24;
+  color-scheme: dark;
+}
+
+/*
+  Dark with no JavaScript. The pre-paint script in app/layout.tsx cannot run, so
+  the CSS answers for it. `html:not(.light)` matters: the toggle puts an explicit
+  `light` class on a dark system, and that choice has to win over the media
+  query. Keep these values in step with `.dark` above.
+*/
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    --paper: 11 11 11;
+    --ink: 237 237 234;
+    --muted: 152 152 148;
+    --rule: 237 237 234;
+    --wash: 26 26 28;
+    --accent: 14 165 233;
+    --accent-strong: 56 189 248;
+    --on-accent: 8 17 24;
+    color-scheme: dark;
+  }
 }
 
 * {
@@ -29,43 +78,76 @@ body {
 
 html {
   scroll-behavior: smooth;
+  /* keep the fixed navbar off anchored section headings */
+  scroll-padding-top: 5rem;
+  background-color: rgb(var(--paper));
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-  font-family: 'Poppins', sans-serif;
+  position: relative;
+  color: rgb(var(--ink));
+  background: transparent;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Glass effect */
+/*
+  The wash (see the `.wash` element in app/layout.tsx) lightens the top of a
+  tall page. It sits behind everything, and — because it is a sibling of the
+  content rather than an ancestor — the solid paper stays the effective
+  background of every text node, so contrast tooling can measure the page.
+*/
+.wash {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 140vh;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(75% 45% at 50% 0%, rgb(var(--wash) / 0.9), transparent 70%);
+}
+
+/* Skip link: off-screen until it is focused, then a real control. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid rgb(var(--rule) / 0.25);
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: translateY(-200%);
+  transition: transform 150ms ease;
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+::selection {
+  background: rgb(var(--rule) / 0.15);
+}
+
+/* Surfaces are hairline boxes, never floating blurred cards. */
 .glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgb(var(--paper));
+  border: 1px solid rgb(var(--rule) / 0.15);
 }
 
-.dark .glass {
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Monospace metadata should line up column to column. */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -73,16 +155,54 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 5px;
+  background: rgb(var(--rule) / 0.22);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: rgb(var(--rule) / 0.35);
 }
 
-/* Focus visible for accessibility */
 *:focus-visible {
-  outline: 2px solid #0ea5e9;
+  outline: 2px solid rgb(var(--accent));
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+  Print: the page furniture is not part of a document. Only /resume is meant to
+  be printed, so this stays narrow — chrome out, paper in, nothing else.
+*/
+@media print {
+  nav,
+  footer,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+
+  .wash {
+    display: none !important;
+  }
+
+  main {
+    min-height: 0;
+  }
 }

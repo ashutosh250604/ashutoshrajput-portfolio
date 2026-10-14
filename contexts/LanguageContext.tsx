@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 
 export type Language = 'en' | 'ja' | 'zh' | 'es' | 'de' | 'ru' | 'hi' | 'gu'
 
@@ -25,7 +25,11 @@ export const languages: { code: Language; name: string; nativeName: string }[] =
   { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી' },
 ]
 
-// Default English translations embedded to prevent flash of untranslated content
+/**
+ * English strings are embedded rather than fetched: they are what gets
+ * prerendered into the static HTML, so the page has real content before any
+ * JavaScript runs.
+ */
 const defaultTranslations: Record<string, string> = {
   "nav.home": "Home",
   "nav.about": "About",
@@ -33,22 +37,22 @@ const defaultTranslations: Record<string, string> = {
   "nav.experience": "Experience",
   "nav.skills": "Skills",
   "nav.contact": "Contact",
-  "hero.greeting": "Hi, I am",
+  "hero.greeting": "Hi, I'm",
   "hero.name": "Ashutosh Rajput",
   "hero.role.fullstack": "Full Stack Developer",
   "hero.role.backend": "Backend Developer",
   "hero.role.software": "Software Developer",
   "hero.role.web": "Web Developer",
-  "hero.description": "I am a passionate developer who crafts elegant solutions to complex problems. Focussed on building scalable web apps with modern technologies.",
+  "hero.description": "Backend developer in Bangalore. Python and Flask most days, Java and GenAI the rest. I like the problems where the answer has to be exactly right.",
   "hero.cta": "Get In Touch",
   "hero.resume": "Resume",
   "hero.openToWork": "Open to Work",
   "hero.scroll": "Scroll Down",
   "about.title": "About",
   "about.title.highlight": "Me",
-  "about.paragraph1": "I am a Computer Engineering graduate looking forward to making a difference and solving issues through software development. I enjoy working in an environment with others, learning from experienced people, and continually improving my ability.",
-  "about.paragraph2": "I learn and build with modern web technologies including React, Node.js, and MongoDB. I love tackling complex problems and turning them into simple, beautiful solutions. When I'm not coding, you'll find me exploring new technologies, solving DSA problems on Leetcode with Java, or expanding my knowledge.",
-  "about.paragraph3": "Currently, I'm focused on learning GenAI, DSA with Java & Cloud technologies to expand my skill set and stay updated with industry trends.",
+  "about.paragraph1": "I'm a computer engineering graduate, and I got into this for the moment a messy problem finally settles into something that works. I'm happiest on a team: I ask a lot of questions, and I'd rather learn from someone who has been doing it for years than work it out quietly on my own.",
+  "about.paragraph2": "Most of what I've built is Python and Flask on the server. The two I'd show you first are Wault, a UPI-style wallet, and a billing application that a furniture store's accountant opens every morning. That second one taught me to care about the unglamorous parts: a backup that actually restores, a PDF whose totals agree with each other, a PIN that is never checked in the browser.",
+  "about.paragraph3": "Right now my days go into data structures and algorithms in Java, and into GenAI: reading, building small things, seeing where they break. I've written enough React and Next.js to build this site end to end, and the server side is where I want to get good.",
   "about.stats.projects": "Built Projects",
   "about.stats.experience": "Internship Experience (Yrs)",
   "about.stats.technologies": "Technologies",
@@ -73,32 +77,94 @@ const defaultTranslations: Record<string, string> = {
   "contact.connect": "Let's Connect",
   "contact.email": "Email",
   "contact.location": "Location",
-  "contact.locationValue": "India",
+  "contact.locationValue": "Bangalore, India",
   "contact.social": "Ping me on social media",
   "contact.cta": "Let's Connect !",
   "contact.ctaDescription": "Whether you have a question or just want to say hi, I'll get back to you in a second 😅!",
   "contact.sendEmail": "Send Me an Email",
-  "footer.builtWith": "Built with Next.js & Tailwind CSS",
   "footer.builtBy": "Built by Ashutosh Rajput",
   "mobileNav.downloadResume": "Download Resume",
-  "project.blinkey-it.title": "Blinkey It - Quick Commerce App",
-  "project.blinkey-it.description": "Full-stack quick-commerce platform with real-time inventory, secure payments via Stripe, and admin dashboard for seamless order management.",
-  "project.sandesha.title": "Sandesha - Secure Messaging App",
-  "project.sandesha.description": "End-to-end encrypted chat application with real-time messaging, QR code contact system, and status updates powered by Socket.io.",
-  "project.wallet-app.title": "Digital Wallet & UPI System",
-  "project.wallet-app.description": "Secure wallet application with UPI integration, transaction history, and real-time balance updates using Python Flask backend.",
-  "project.qr-monitor.title": "QR Code Monitoring System",
-  "project.qr-monitor.description": "Automated QR code tracking system with scheduled checks, real-time status monitoring, and comprehensive analytics dashboard.",
+  "project.wallet-app.title": "Wault — a UPI-Style Wallet",
+  "project.wallet-app.description": "A phone-sized wallet you can actually use: OTP sign-in, a 4-digit payment PIN, your own @okwault UPI ID with a QR code, transfers, money requests and scratch-card rewards. It is not wired to a bank or to UPI itself — money moves only between accounts inside the app.",
   "project.card-game.title": "7-8 Strategic Card Game",
-  "project.card-game.description": "Interactive browser-based card game with AI opponent, trump system, and real-time score tracking featuring smooth animations.",
+  "project.card-game.description": "The Indian trick-taking game, rebuilt for the browser: a 30-card deck, a coin toss for the first trump, an opponent in three difficulties and a log of every move.",
   "project.portfolio.title": "Developer Portfolio",
-  "project.portfolio.description": "Modern portfolio built with Next.js featuring dark mode, smooth animations, and responsive design to showcase projects and skills.",
+  "project.portfolio.description": "This site: rebuilt by hand, exported as flat static HTML, and set like a document — numbered sections, hairline rules and monospace metadata.",
   "experience.zendevx.role": "Software Developer Intern",
   "experience.zendevx.company": "ZenDevX",
   "experience.zendevx.description": "Worked on developing and maintaining web applications using modern technologies. Collaborated with cross-functional teams to deliver high-quality software solutions.",
   "experience.zendevx.achievement1": "Improved application stability by about 25% through bug reductions in modules and making the UI more responsive, impacting over 200 internal users.",
   "experience.zendevx.achievement2": "Enhanced the no-code engine for ZenDevX, increasing code generation accuracy by approximately 15% and reducing manual development time for client teams by up to 30%.",
-  "experience.zendevx.achievement3": "Delivered more than 10 feature updates in iterations; all were completed on time due to good coordination with different teams and taking stakeholder feedback into consideration."
+  "experience.zendevx.achievement3": "Delivered more than 10 feature updates in iterations; all were completed on time due to good coordination with different teams and taking stakeholder feedback into consideration.",
+  "a11y.openMenu": "Open menu",
+  "a11y.skipToContent": "Skip to content",
+  "a11y.closeMenu": "Close menu",
+  "a11y.selectLanguage": "Select language",
+  "a11y.switchToDark": "Switch to dark mode",
+  "a11y.switchToLight": "Switch to light mode",
+  "a11y.scrollToTop": "Scroll to top",
+  "a11y.copyEmail": "Copy email address",
+  "a11y.openPalette": "Open command palette",
+  "palette.hint": "Command palette",
+  "palette.placeholder": "Search sections, projects and links",
+  "palette.empty": "No matches",
+  "palette.sections": "Sections",
+  "palette.projects": "Projects",
+  "palette.links": "Links",
+  "about.education": "B.E. Computer Engineering",
+  "about.focus": "GenAI · DSA in Java · Cloud",
+  "about.spec.role": "Role",
+  "about.spec.location": "Based in",
+  "about.spec.education": "Education",
+  "about.spec.focus": "Currently learning",
+  "about.spec.status": "Status",
+  "about.spec.stack": "Day-to-day",
+  "about.spec.stackValue": "Python · Flask · SQL",
+  "projects.note": "04 projects · 2025 — 2026",
+  "projects.tech": "Stack",
+  "projects.status.live": "Live",
+  "projects.status.running": "In daily use",
+  "projects.status.shipped": "Shipped",
+  "projects.status.private": "Private build",
+  "projects.more": "The rest of my repositories live on GitHub.",
+  "projects.moreCta": "See all repositories",
+  "project.ifm-billing.title": "IFM Billing Software",
+  "project.ifm-billing.description": "Billing and invoice management for International Furniture Mart, Ahmedabad — sales and purchase bills, printable tax invoices, and CA-ready PDF reports on a local SQLite database.",
+  "project.wallet-app.highlight1": "The PIN is verified on the server for every debit, and balances are integer paise moved by atomic updates, so two taps at once cannot overdraw an account",
+  "project.wallet-app.highlight2": "Flask 3, SQLAlchemy and PostgreSQL behind a React 19 and TypeScript client, shipped as one Docker image on Render so the API and the app share an origin",
+  "project.wallet-app.highlight3": "66 pytest tests, a daily sending limit enforced in the ledger, and CSV and PDF statements counted in the Indian calendar day — UTC in the database, IST on screen",
+  "project.ifm-billing.highlight1": "Purchase and sales bills with automatic GST at 9% CGST + 9% SGST",
+  "project.ifm-billing.highlight2": "Monthly and quarterly CA-ready PDF reports, plus print-ready tax invoices",
+  "project.ifm-billing.highlight3": "Automatic daily database backups with a self-check, in daily use at the store",
+  "project.card-game.highlight1": "Trump declarations, a CPU opponent and live score tracking",
+  "project.card-game.highlight2": "Game rules, turn order and scoring modelled in plain JavaScript",
+  "project.card-game.highlight3": "Opens straight in the browser with no build step",
+  "project.portfolio.highlight1": "Eight languages, dark mode and a static export with no runtime backend",
+  "project.portfolio.highlight2": "Set like a document: numbered sections, hairline rules, monospace metadata",
+  "project.portfolio.highlight3": "Command palette (⌘K), copy-to-clipboard email and a colophon",
+  "contact.copy": "Copy",
+  "contact.copied": "Copied",
+  "contact.availability": "Availability",
+  "contact.localTime": "Local time",
+  "colophon.title": "Colophon",
+  "colophon.note": "How this site is built",
+  "colophon.built": "Built with",
+  "colophon.host": "Deployed on",
+  "colophon.source": "Source",
+  "colophon.updated": "Last updated",
+  "colophon.changelog": "Changelog",
+  "colophon.change1": "2026.01 — Went multilingual: eight languages and a dark theme",
+  "colophon.change2": "2026.10 — Every section rebuilt as an editorial index, with a ⌘K palette",
+  "colophon.change3": "2026.10 — Warmer paper, a new mark, and a card game hidden behind the Konami code",
+  "colophon.nojs": "Content, links and navigation work without JavaScript.",
+  "palette.secret": "Secret",
+  "egg.title": "The 7–8 deck",
+  "egg.palette": "Deal a hand of 7–8",
+  "egg.deal": "Deal again",
+  "egg.trump": "Trump",
+  "egg.cta": "Play the real game",
+  "egg.close": "Close",
+  "egg.body": "Seven cards from the thirty-card deck, and the suit this hand would be played in. The Konami code works anywhere on this page — that is how this opened."
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -107,58 +173,54 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    // Load saved language preference
-    const savedLang = localStorage.getItem('language') as Language
-    if (savedLang && languages.some(l => l.code === savedLang)) {
-      setLanguageState(savedLang)
-    } else {
-      // If no saved language or it's English, mark as loaded immediately
-      setIsLoaded(true)
-    }
+    const saved = localStorage.getItem('language') as Language | null
+    if (saved && languages.some((entry) => entry.code === saved)) setLanguageState(saved)
   }, [])
 
   useEffect(() => {
-    // Load translations when language changes
-    const loadTranslations = async () => {
-      // If English, use default translations (already loaded)
-      if (language === 'en') {
-        setTranslations(defaultTranslations)
-        setIsLoaded(true)
-        return
-      }
+    // English is embedded, so it needs no fetch and no loading state.
+    if (language === 'en') {
+      setTranslations(defaultTranslations)
+      setIsLoaded(true)
+      document.documentElement.lang = 'en'
+      return
+    }
 
+    let cancelled = false
+
+    const loadTranslations = async () => {
       try {
         const response = await fetch(`/translations/${language}.json`)
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const data = await response.json()
-        setTranslations(data)
-        setIsLoaded(true)
+        if (cancelled) return
+        setTranslations({ ...defaultTranslations, ...data })
+        document.documentElement.lang = language
       } catch (error) {
         console.error('Failed to load translations:', error)
-        // Fallback to English
+        if (cancelled) return
         setTranslations(defaultTranslations)
-        setIsLoaded(true)
+      } finally {
+        if (!cancelled) setIsLoaded(true)
       }
     }
+
     loadTranslations()
+
+    return () => {
+      cancelled = true
+    }
   }, [language])
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang)
     localStorage.setItem('language', lang)
-  }
+  }, [])
 
-  const t = (key: string): string => {
-    return translations[key] || defaultTranslations[key] || key
-  }
-
-  // Show nothing while loading to prevent flash of untranslated content
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
-      </div>
-    )
-  }
+  const t = useCallback(
+    (key: string): string => translations[key] || defaultTranslations[key] || key,
+    [translations]
+  )
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, translations, isLoaded }}>
