@@ -1,0 +1,20 @@
+#!/bin/sh
+# Strips any line that mentions Codebuff from the commit message, so the tool
+# never shows up as a contributor on GitHub. Install into a clone with:
+#   cp scripts/git-hooks/commit-msg .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+msg_file="$1"
+[ -n "$msg_file" ] && [ -f "$msg_file" ] || exit 0
+
+if grep -qi 'codebuff' "$msg_file"; then
+  tmp="$msg_file.tmp"
+  grep -v -i 'codebuff' "$msg_file" > "$tmp" && mv "$tmp" "$msg_file"
+  echo "commit-msg: removed the Codebuff attribution line(s)." >&2
+fi
+
+# Trailing blank lines left behind by the removal are trimmed to nothing.
+if [ -s "$msg_file" ]; then
+  tmp="$msg_file.tmp"
+  printf '%s\n' "$(cat "$msg_file")" > "$tmp" && mv "$tmp" "$msg_file"
+fi
+
+exit 0
