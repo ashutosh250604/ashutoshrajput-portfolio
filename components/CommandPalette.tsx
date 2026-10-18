@@ -6,6 +6,11 @@ import projects, { profileUrl } from '@/data/projects'
 import { emailAddress, socials } from '@/data/socials'
 import { lockScroll, unlockScroll } from '@/lib/scrollLock'
 import { dealDeck } from './CardDeckEgg'
+import { startChaos } from './ChaosMode'
+import { eggs, openEggIndex, useFoundEggs, type EggId } from '@/lib/eggs'
+import { bindingHint, currentPlatform } from '@/lib/keys'
+import { startOS } from '@/lib/os'
+import { openBlueprint, openInk, openKeys, openProof, openReceipt, openSignal } from '@/lib/secrets'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 const OPEN_EVENT = 'portfolio:open-palette'
@@ -22,8 +27,8 @@ interface PaletteItem {
   group: string
   href: string
   external?: boolean
-  /** Internal actions instead of navigation. */
-  action?: 'deck'
+  /** Internal actions instead of navigation; each one is a secret's own door. */
+  action?: EggId | 'index'
 }
 
 export default function CommandPalette() {
@@ -34,6 +39,8 @@ export default function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const pendingRef = useRef<PaletteItem | null>(null)
+  const found = useFoundEggs()
+  const platform = currentPlatform()
 
   const items: PaletteItem[] = useMemo(() => {
     const sections: { key: string; href: string; index: string }[] = [
@@ -86,16 +93,32 @@ export default function CommandPalette() {
         href: '/resume.pdf',
         external: true,
       },
-      {
-        id: 'action-deck',
-        label: t('egg.palette'),
-        hint: '↑↑↓↓←→←→BA',
+      // Every secret, from the register: the palette cannot fall behind the
+      // key sheet because both are reading the same list.
+      ...eggs.map((egg) => ({
+        id: `action-${egg.id}`,
+        label: t(egg.labelKey),
+        hint: bindingHint(egg.binding, platform),
         group: t('palette.secret'),
         href: '',
-        action: 'deck',
-      },
+        action: egg.id,
+      })),
+      // Listed only once there is something in the register to list: the index
+      // is the reward for finding the first one, not a spoiler.
+      ...(found.length > 0
+        ? [
+            {
+              id: 'action-index',
+              label: t('colophon.secrets'),
+              hint: `${found.length}/${eggs.length}`,
+              group: t('palette.secret'),
+              href: '',
+              action: 'index' as const,
+            },
+          ]
+        : []),
     ]
-  }, [t])
+  }, [t, found, platform])
 
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -157,10 +180,28 @@ export default function CommandPalette() {
     window.history.replaceState(null, '', item.href)
   }, [open])
 
+  /**
+   * One door per secret. Ringing it is the palette's whole job here: the egg
+   * itself decides what opening means, so this table does not have to grow a
+   * branch for every one that gets added.
+   */
+  const doors: Record<NonNullable<PaletteItem['action']>, () => void> = {
+    deck: dealDeck,
+    chaos: startChaos,
+    os: startOS,
+    grid: openBlueprint,
+    signal: openSignal,
+    proof: openProof,
+    ink: openInk,
+    receipt: openReceipt,
+    keys: openKeys,
+    index: openEggIndex,
+  }
+
   const go = (item: PaletteItem) => {
-    if (item.action === 'deck') {
+    if (item.action) {
       setOpen(false)
-      dealDeck()
+      doors[item.action]()
       return
     }
     if (item.external) {

@@ -1,7 +1,7 @@
 /**
  * Static key audit: every translation key the components ask for must exist in
- * the English defaults in contexts/LanguageContext.tsx, including the keys the
- * code assembles at runtime (project ids, experience slugs, changelog numbers).
+ * the English source, including the keys the code assembles at runtime (project
+ * ids, experience slugs, changelog numbers).
  *
  * check-translations.cjs proves the files agree with each other; this proves
  * they agree with the code. A missing key renders as the raw key on the page.
@@ -13,20 +13,17 @@ const root = path.join(__dirname, '..')
 const readFile = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8')
 
 const contextSource = readFile('contexts', 'LanguageContext.tsx')
-const start = contextSource.indexOf('const defaultTranslations')
-const end = contextSource.indexOf('export function LanguageProvider')
-if (start === -1 || end === -1) {
-  console.error('Could not locate defaultTranslations in LanguageContext.tsx')
-  process.exit(1)
-}
 
 /** Keys the code asks for. */
 const used = new Set()
 
 // 1. Literal t('some.key') calls.
-// 2. Any quoted string shaped like a key, e.g. { key: 'nav.home' } in a data table.
+// 2. Keys named as such in a data table, e.g. { key: 'nav.home' } in the nav
+//    or { labelKey: 'egg.title' } in the egg registry. Deliberately narrow: a
+//    quoted string that merely looks like a key is not one — the desktop's
+//    terminal lists 'about.txt' and 'resume.pdf', and neither is a string.
 const sourceFiles = []
-for (const dir of ['components', 'app']) {
+for (const dir of ['components', 'app', 'lib']) {
   for (const file of fs.readdirSync(path.join(root, dir))) {
     if (/\.tsx?$/.test(file)) sourceFiles.push(path.join(dir, file))
   }
@@ -35,7 +32,9 @@ for (const dir of ['components', 'app']) {
 for (const file of sourceFiles) {
   const source = readFile(file)
   for (const match of source.matchAll(/\bt\(\s*'([^']+)'\s*\)/g)) used.add(match[1])
-  for (const match of source.matchAll(/['"`]([a-z][a-zA-Z]*\.[a-zA-Z0-9.]+)['"`]/g)) used.add(match[1])
+  for (const match of source.matchAll(/\b(?:key|labelKey|titleKey)\s*:\s*['"]([a-z][a-zA-Z]*\.[a-zA-Z0-9.]+)['"]/g)) {
+    used.add(match[1])
+  }
 }
 
 // The language context itself names every locale it can load.
@@ -75,18 +74,14 @@ for (const match of readFile('data', 'skills.ts').matchAll(/^\s{2}([a-zA-Z]+):\s
   used.add(`skills.${match[1]}`)
 }
 
-/** Keys defined in the English defaults. */
-const known = new Set()
-for (const line of contextSource.slice(start, end).split('\n')) {
-  const match = line.match(/^\s*"([^"]+)":\s*"/)
-  if (match) known.add(match[1])
-}
+/** Keys defined in the English source. */
+const known = new Set(Object.keys(JSON.parse(readFile('public', 'translations', 'en.json'))))
 
 const missing = [...used].filter((key) => !known.has(key)).sort()
 const unused = [...known].filter((key) => !used.has(key)).sort()
 
 console.log(`keys the code asks for:   ${used.size}`)
-console.log(`keys in the defaults:     ${known.size}\n`)
+console.log(`keys in the English source: ${known.size}\n`)
 
 if (missing.length) {
   console.log(`FAIL  ${missing.length} key(s) used but not defined:\n  ${missing.join('\n  ')}`)

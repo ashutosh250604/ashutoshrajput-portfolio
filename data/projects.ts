@@ -2,6 +2,12 @@ export type ProjectStatus = 'live' | 'running' | 'shipped' | 'private'
 
 export interface Project {
   id: string
+  /**
+   * The short name, as the project is actually called: Wault, 7–8. The site
+   * shows the longer `project.<id>.title` instead ("Wault — a UPI-Style
+   * Wallet"); this is what the generated README links read as.
+   */
+  name: string
   year: string
   status: ProjectStatus
   /** Number of `project.<id>.highlightN` keys that exist for this project. */
@@ -22,6 +28,7 @@ export interface Project {
 const projects: Project[] = [
   {
     id: 'wallet-app',
+    name: 'Wault',
     year: '2026',
     status: 'live',
     highlights: 3,
@@ -31,6 +38,7 @@ const projects: Project[] = [
   },
   {
     id: 'ifm-billing',
+    name: 'IFM Billing Software',
     year: '2026',
     status: 'running',
     highlights: 3,
@@ -38,6 +46,7 @@ const projects: Project[] = [
   },
   {
     id: 'card-game',
+    name: '7–8',
     year: '2025',
     status: 'shipped',
     highlights: 3,
@@ -47,6 +56,7 @@ const projects: Project[] = [
   },
   {
     id: 'portfolio',
+    name: 'Portfolio',
     year: '2026',
     status: 'live',
     highlights: 3,

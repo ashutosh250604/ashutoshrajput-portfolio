@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check": "node scripts/check-translations.cjs && node scripts/check-keys.cjs && node scripts/check-contrast.cjs",
+    "check": "node scripts/check-translations.cjs && node scripts/check-keys.cjs && node scripts/check-contrast.cjs && node scripts/check-links.cjs && node scripts/project-blurbs.cjs",
+    "links": "node scripts/check-links.cjs",
+    "blurbs": "node scripts/project-blurbs.cjs",
+    "blurbs:write": "node scripts/project-blurbs.cjs --write",
     "images": "node scripts/optimize-images.cjs",
     "resume": "next build && node scripts/make-resume.cjs",
     "resume:only": "node scripts/make-resume.cjs"

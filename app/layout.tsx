@@ -6,6 +6,10 @@ import Footer from '@/components/Footer'
 import ScrollTop from '@/components/ScrollTop'
 import CommandPalette from '@/components/CommandPalette'
 import CardDeckEgg from '@/components/CardDeckEgg'
+import ChaosMode from '@/components/ChaosMode'
+import MiniOSMount from '@/components/MiniOSMount'
+import SecretMount from '@/components/SecretMount'
+import ConsoleGreeting from '@/components/ConsoleGreeting'
 import SkipLink from '@/components/SkipLink'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 
@@ -28,7 +32,7 @@ export const metadata: Metadata = {
     title: 'Ashutosh Rajput — Backend Developer',
     description: 'Python and Flask with SQL underneath; GenAI and DSA in Java on the side.',
     type: 'website',
-    url: 'https://ashutoshrajput.vercel.app',
+    url: 'https://ashutoshrajput-portfolio.vercel.app',
   },
 }
 
@@ -85,6 +89,10 @@ export default function RootLayout({
           <ScrollTop />
           <CommandPalette />
           <CardDeckEgg />
+          <MiniOSMount />
+          <SecretMount />
+          <ChaosMode />
+          <ConsoleGreeting />
         </LanguageProvider>
       </body>
     </html>

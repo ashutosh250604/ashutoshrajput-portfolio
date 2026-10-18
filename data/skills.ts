@@ -8,5 +8,5 @@ export default {
   backend: ['Flask', 'REST APIs', 'SQLAlchemy', 'Jinja2', 'JWT auth'],
   database: ['PostgreSQL', 'SQLite', 'MySQL'],
   frontend: ['React', 'Next.js', 'Tailwind CSS', 'HTML5', 'CSS3'],
-  tools: ['Git', 'GitHub', 'Docker', 'Linux', 'VS Code', 'Postman', 'Render', 'Vercel'],
+  tools: ['Git', 'GitHub', 'Docker', 'VS Code', 'Postman', 'Render', 'Vercel'],
 }

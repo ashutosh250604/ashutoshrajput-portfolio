@@ -78,6 +78,14 @@ const config: Config = {
         'slide-in-right': 'slideInRight 0.25s ease-out',
         'card-in': 'cardIn 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both',
         'orbit': 'orbit 90s linear infinite',
+        // The desktop's start-up bar, timed to the boot delay in MiniOS.tsx.
+        'os-boot': 'osBoot 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'os-open': 'osOpen 0.18s ease-out both',
+        // Blueprint's column guides drop in from the top; the press proof's
+        // marks fade up. Both are short enough to read as the instrument
+        // arriving rather than as an animation being played at you.
+        'rules-in': 'rulesIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both',
+        'marks-in': 'marksIn 0.45s ease-out both',
       },
       keyframes: {
         fadeIn: {
@@ -103,6 +111,22 @@ const config: Config = {
         orbit: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        osBoot: {
+          '0%': { width: '3%' },
+          '100%': { width: '100%' },
+        },
+        osOpen: {
+          '0%': { transform: 'scale(0.98)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        rulesIn: {
+          '0%': { transform: 'scaleY(0)', opacity: '0' },
+          '100%': { transform: 'scaleY(1)', opacity: '1' },
+        },
+        marksIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
       },
     },

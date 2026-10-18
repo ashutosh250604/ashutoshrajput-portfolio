@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, X } from 'lucide-react'
 import { cardGameUrl } from '@/data/projects'
 import { lockScroll, unlockScroll } from '@/lib/scrollLock'
+import { useShortcuts } from '@/lib/shortcuts'
+import { bindingOf, markEggFound } from '@/lib/eggs'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 const OPEN_EVENT = 'portfolio:deal-deck'
@@ -56,12 +58,6 @@ function shuffle<T>(input: T[]): T[] {
   return copy
 }
 
-const KONAMI = [
-  'arrowup', 'arrowup', 'arrowdown', 'arrowdown',
-  'arrowleft', 'arrowright', 'arrowleft', 'arrowright',
-  'b', 'a',
-]
-
 export default function CardDeckEgg() {
   const { t } = useLanguage()
   const [open, setOpen] = useState(false)
@@ -69,7 +65,6 @@ export default function CardDeckEgg() {
   const [trump, setTrump] = useState(suits[0])
   const [deals, setDeals] = useState(0)
   const closeRef = useRef<HTMLButtonElement>(null)
-  const progress = useRef<string[]>([])
 
   const deal = useCallback(() => {
     setHand(shuffle(deck).slice(0, 7))
@@ -77,32 +72,22 @@ export default function CardDeckEgg() {
     setDeals((count) => count + 1)
   }, [])
 
-  // The back door: the Konami code, typed anywhere on the page.
+  // The back door: the Konami code, typed anywhere on the page. The sequence
+  // itself lives in the egg register, so the key sheet prints what this listens for.
+  useShortcuts([{ ...bindingOf('deck'), run: () => setOpen(true) }])
+
+  // The command palette opens the same dialog without typing anything.
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase()
-      const next = [...progress.current, key].slice(-KONAMI.length)
-      progress.current = next
-      if (next.join(',') === KONAMI.join(',')) {
-        progress.current = []
-        setOpen(true)
-      }
-    }
-
     const onOpen = () => setOpen(true)
-
-    window.addEventListener('keydown', onKeyDown)
     window.addEventListener(OPEN_EVENT, onOpen)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener(OPEN_EVENT, onOpen)
-    }
+    return () => window.removeEventListener(OPEN_EVENT, onOpen)
   }, [])
 
   useEffect(() => {
     if (!open) return
 
     deal()
+    markEggFound('deck')
     lockScroll()
     closeRef.current?.focus()
 

@@ -1,27 +1,25 @@
 /**
  * Key-parity check: every translation file must carry exactly the same keys as
- * the English defaults embedded in contexts/LanguageContext.tsx.
+ * the English source.
+ *
+ * That source is public/translations/en.json, which is also what the site
+ * imports as its English defaults and what the /resume route prints from — so
+ * this now checks the locales against the one file that matters, rather than
+ * against a second copy of the English strings that used to be held inline in
+ * contexts/LanguageContext.tsx. The parity test is the same; there is simply
+ * only one thing to be in parity with.
  */
 const fs = require('fs')
 const path = require('path')
 
 const root = path.join(__dirname, '..')
-const source = fs.readFileSync(path.join(root, 'contexts', 'LanguageContext.tsx'), 'utf8')
+const english = JSON.parse(
+  fs.readFileSync(path.join(root, 'public', 'translations', 'en.json'), 'utf8')
+)
 
-const start = source.indexOf('const defaultTranslations')
-const end = source.indexOf('export function LanguageProvider')
-if (start === -1 || end === -1) {
-  console.error('Could not locate defaultTranslations in LanguageContext.tsx')
-  process.exit(1)
-}
+const reference = new Set(Object.keys(english))
 
-const reference = new Set()
-for (const line of source.slice(start, end).split('\n')) {
-  const match = line.match(/^\s*"([^"]+)":\s*"/)
-  if (match) reference.add(match[1])
-}
-
-console.log(`English defaults: ${reference.size} keys\n`)
+console.log(`English source: ${reference.size} keys\n`)
 
 let failures = 0
 for (const file of fs.readdirSync(path.join(root, 'public', 'translations')).sort()) {

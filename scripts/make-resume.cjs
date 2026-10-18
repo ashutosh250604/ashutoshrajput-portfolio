@@ -33,7 +33,7 @@ const required = [
   'PostgreSQL',
   'Wault',
   'IFM Billing Software',
-  'B.E. Computer Engineering',
+  'B.Tech Computer Engineering',
 ]
 
 /**
@@ -108,14 +108,31 @@ async function main() {
     process.exit(1)
   }
 
-  // Keep the resume that was here before this script existed.
+  /*
+   * Never destroy a resume nobody else can recover. Two archives, because
+   * there are two ways one arrives here: the copy that predates this script,
+   * and a PDF put in public/resume.pdf by hand. The second is detected by
+   * difference — a file that is not the byte-for-byte output of the last run
+   * did not come from this script.
+   */
   if (fs.existsSync(target)) {
     const backupDir = path.join(root, '.resume-backup')
-    const backup = path.join(backupDir, 'resume-original.pdf')
-    if (!fs.existsSync(backup)) {
-      fs.mkdirSync(backupDir, { recursive: true })
-      fs.copyFileSync(target, backup)
-      console.log(`kept the previous public/resume.pdf at ${path.relative(root, backup)}`)
+    fs.mkdirSync(backupDir, { recursive: true })
+
+    const original = path.join(backupDir, 'resume-original.pdf')
+    if (!fs.existsSync(original)) {
+      fs.copyFileSync(target, original)
+      console.log(`kept the previous public/resume.pdf at ${path.relative(root, original)}`)
+    }
+
+    const lastOutput = path.join(outDir, 'resume.pdf')
+    const isOurOutput =
+      fs.existsSync(lastOutput) && fs.readFileSync(lastOutput).equals(fs.readFileSync(target))
+    if (!isOurOutput) {
+      const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')
+      const handPlaced = path.join(backupDir, `resume-replaced-${stamp}.pdf`)
+      fs.copyFileSync(target, handPlaced)
+      console.log(`archived the resume this run replaces at ${path.relative(root, handPlaced)}`)
     }
   }
 
