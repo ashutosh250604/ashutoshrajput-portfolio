@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 /**
  * The four buttons sit on the outer ring at the diagonals, clockwise from the
  * top left. 20%/80% of the plate puts each centre on a radius of about 42% of
- * the width — the same radius as the ring they ride on (inset 8%), so they read
+ * the width - the same radius as the ring they ride on (inset 8%), so they read
  * as nodes on a wire instead of dots floating in the margin.
  */
 const orbitPositions = [
@@ -31,6 +31,7 @@ export default function Hero() {
   const [currentRole, setCurrentRole] = useState(0)
   const [displayedText, setDisplayedText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
 
   const roles = useMemo(() => [
     t('hero.role.fullstack'),
@@ -39,28 +40,49 @@ export default function Hero() {
     t('hero.role.web')
   ], [t])
 
+  // A visitor who asked the system not to animate things gets the role in
+  // full, and nothing that types itself out.
   useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setReducedMotion(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setDisplayedText(roles[currentRole] ?? '')
+      return
+    }
+
+    // The two-second pause after a word is finished is its own timer, and it
+    // has to be cleared with the typing one or leaving the page mid-pause
+    // sets state on an unmounted component.
+    let pause: ReturnType<typeof setTimeout> | undefined
+
     const timeout = setTimeout(() => {
-      const currentFullText = roles[currentRole]
+      const currentFullText = roles[currentRole] ?? ''
 
       if (!isDeleting) {
         if (displayedText.length < currentFullText.length) {
           setDisplayedText(currentFullText.slice(0, displayedText.length + 1))
         } else {
-          setTimeout(() => setIsDeleting(true), 2000)
+          pause = setTimeout(() => setIsDeleting(true), 2000)
         }
+      } else if (displayedText.length === 0) {
+        setIsDeleting(false)
+        setCurrentRole((prev) => (prev + 1) % roles.length)
       } else {
-        if (displayedText.length === 0) {
-          setIsDeleting(false)
-          setCurrentRole((prev) => (prev + 1) % roles.length)
-        } else {
-          setDisplayedText(displayedText.slice(0, -1))
-        }
+        setDisplayedText(displayedText.slice(0, -1))
       }
     }, isDeleting ? 50 : 100)
 
-    return () => clearTimeout(timeout)
-  }, [displayedText, isDeleting, currentRole, roles])
+    return () => {
+      clearTimeout(timeout)
+      if (pause) clearTimeout(pause)
+    }
+  }, [displayedText, isDeleting, currentRole, roles, reducedMotion])
 
   return (
     <section id="home" className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-3 pb-8 pt-16 sm:px-4 sm:pb-0 sm:pt-20">
@@ -74,9 +96,14 @@ export default function Hero() {
                 <span>{t('hero.name')}</span>
               </h1>
               <div className="flex h-8 items-center justify-center sm:h-10 md:h-12 md:justify-start">
-                <p className="text-base font-semibold text-accent sm:text-lg md:text-2xl lg:text-3xl">
-                  {displayedText}
-                  <span className="animate-pulse">|</span>
+                <p
+                  aria-label={roles[currentRole]}
+                  className="text-base font-semibold text-accent sm:text-lg md:text-2xl lg:text-3xl"
+                >
+                  <span aria-hidden>{displayedText}</span>
+                  <span aria-hidden className="animate-pulse">
+                    |
+                  </span>
                 </p>
               </div>
             </div>
@@ -103,7 +130,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right Content — the portrait, set as a plate with the links on its ring */}
+          {/* Right Content - the portrait, set as a plate with the links on its ring */}
           <div className="order-1 flex flex-col items-center animate-fade-in md:order-2">
             <div className="relative flex h-60 w-60 items-center justify-center xs:h-64 xs:w-64 sm:h-72 sm:w-72 lg:h-[22rem] lg:w-[22rem]">
               {/* halo, barely there */}
@@ -125,7 +152,7 @@ export default function Hero() {
                * The artwork is a dark scene, so a hard circular cut reads as a
                * sticker pasted on the page. Scaling it slightly past the frame
                * crops the illustration's own dark border, and the paper-toned
-               * vignette over the rim fades it into the page — in either theme,
+               * vignette over the rim fades it into the page - in either theme,
                * because it is drawn in the paper token rather than the artwork's
                * black.
                */}

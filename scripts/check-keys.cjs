@@ -20,7 +20,7 @@ const used = new Set()
 // 1. Literal t('some.key') calls.
 // 2. Keys named as such in a data table, e.g. { key: 'nav.home' } in the nav
 //    or { labelKey: 'egg.title' } in the egg registry. Deliberately narrow: a
-//    quoted string that merely looks like a key is not one — the desktop's
+//    quoted string that merely looks like a key is not one - the desktop's
 //    terminal lists 'about.txt' and 'resume.pdf', and neither is a string.
 const sourceFiles = []
 for (const dir of ['components', 'app', 'lib']) {

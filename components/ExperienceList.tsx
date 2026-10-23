@@ -46,7 +46,7 @@ export default function ExperienceList() {
                 className="grid gap-4 border-t border-rule/15 py-8 sm:py-10 md:grid-cols-12 md:gap-6"
               >
                 <p className="tabular font-mono text-xs text-muted md:col-span-3">
-                  {toStamp(job.start)} — {toStamp(job.end)}
+                  {toStamp(job.start)} - {toStamp(job.end)}
                 </p>
 
                 <div className="space-y-4 md:col-span-9">

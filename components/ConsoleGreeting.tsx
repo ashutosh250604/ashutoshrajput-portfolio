@@ -28,7 +28,7 @@ export default function ConsoleGreeting() {
     if (greeted) return
     greeted = true
 
-    console.log('%cAR%c  Ashutosh Rajput — backend developer, Bangalore', MONOGRAM, STRONG)
+    console.log('%cAR%c  Ashutosh Rajput - backend developer, Bangalore', MONOGRAM, STRONG)
     console.log(
       `%c rev ${revision} · set by hand, exported as flat HTML · no runtime backend`,
       QUIET

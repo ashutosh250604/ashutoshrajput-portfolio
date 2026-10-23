@@ -10,7 +10,7 @@ import { useShortcuts } from '@/lib/shortcuts'
 /**
  * Signal: four notes the browser makes for itself.
  *
- * There is no audio file anywhere in this project, and that is the point — the
+ * There is no audio file anywhere in this project, and that is the point - the
  * site is a static export with no runtime backend, so the only way it can make
  * a sound is to build the waveform in front of you. An A major arpeggio, sine
  * with a quiet triangle an octave up for a little sheen, under an envelope
@@ -43,7 +43,7 @@ type BrowserAudio = typeof AudioContext
  * Written this way because TypeScript keeps its pre-await narrowing on a direct
  * `context.state` read: after `if (state === 'suspended')` it believes the state
  * can only still be "suspended", which makes asking again look like a mistake.
- * It is not — `resume()` is exactly what changes it.
+ * It is not - `resume()` is exactly what changes it.
  */
 const stateOf = (context: AudioContext): AudioContextState => context.state
 

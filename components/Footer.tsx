@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { profileUrl } from '@/data/projects'
+import { revision } from '@/data/colophon'
 import { EGG_INDEX_EVENT, eggs, useFoundEggs } from '@/lib/eggs'
 import { bindingLabel } from '@/lib/keys'
 import { useLocalTime } from '@/lib/localTime'
@@ -51,8 +52,8 @@ export default function Footer() {
     { label: t('colophon.built'), value: buildStack },
     { label: t('colophon.host'), value: hostedOn },
     { label: t('colophon.source'), value: 'github.com/ashutosh250604', href: profileUrl },
-    { label: t('colophon.updated'), value: '2026.10' },
-    { label: t('contact.localTime'), value: time ?? '— —' },
+    { label: t('colophon.updated'), value: revision },
+    { label: t('contact.localTime'), value: time ?? '--:--' },
   ]
 
   return (
@@ -82,7 +83,7 @@ export default function Footer() {
                       href={row.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline-offset-4 hover:text-accent hover:underline hover:text-accent"
+                      className="underline-offset-4 hover:text-accent hover:underline"
                     >
                       {row.value}
                     </a>
@@ -111,7 +112,7 @@ export default function Footer() {
               href={profileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group mt-6 inline-flex items-center gap-1.5 font-mono text-xs underline-offset-4 hover:text-accent hover:underline hover:text-accent"
+              className="group mt-6 inline-flex items-center gap-1.5 font-mono text-xs underline-offset-4 hover:text-accent hover:underline"
             >
               {t('projects.moreCta')}
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -172,7 +173,7 @@ export default function Footer() {
         ) : null}
 
         <div className="mt-10 flex flex-col gap-3 border-t border-rule/15 pt-6 font-mono text-[11px] text-muted sm:flex-row sm:items-center sm:justify-between">
-          <span className="tabular">© {currentYear} — {t('footer.builtBy')}</span>
+          <span className="tabular">© {currentYear} - {t('footer.builtBy')}</span>
           <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {/* The one visible way into the key sheet. Quiet, but a visitor who
                 reads the bottom of a page can find it without being told. */}

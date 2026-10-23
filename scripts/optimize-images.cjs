@@ -2,7 +2,7 @@
 /**
  * Sizes the artwork the way the page actually uses it.
  *
- * The hero plate is at most 232px wide, so the 2x file is 512px — the original
+ * The hero plate is at most 232px wide, so the 2x file is 512px - the original
  * avatar.jpg the site shipped was 573 KB, which is more than every other asset
  * on the page put together. Run this again after replacing public/avatar.jpg;
  * the page then serves avatar.webp with avatar.jpg as the fallback.

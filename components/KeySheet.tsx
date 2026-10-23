@@ -18,8 +18,8 @@ import { useShortcuts } from '@/lib/shortcuts'
 /**
  * The key sheet: every way into the page, on one slip.
  *
- * A hidden page needs a way of being found that is not a link — that is what
- * keeps the secrets secrets — but "you had to be told on Twitter" is not a
+ * A hidden page needs a way of being found that is not a link - that is what
+ * keeps the secrets secrets - but "you had to be told on Twitter" is not a
  * mechanism either. So this lists every trigger, including the ones that are
  * still unfound, and marks them the way the colophon's index does. The list is
  * read from the register rather than written out here: a sheet that lies about

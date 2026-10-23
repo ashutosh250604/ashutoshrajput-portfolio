@@ -37,7 +37,7 @@ export default function ProjectEntry({ project, position }: { project: Project; 
             {highlights.map((item) => (
               <li key={item.key} className="flex gap-3 text-sm leading-relaxed">
                 <span aria-hidden className="font-mono text-accent">
-                  —
+                  -
                 </span>
                 <span>{item.value}</span>
               </li>

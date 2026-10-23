@@ -80,7 +80,7 @@ for (const [name, tokens] of Object.entries(themes)) {
     if (!ok) failures++
     console.log(
       `  ${ok ? 'PASS' : 'FAIL'}  ${foreground} on ${background}: ${value.toFixed(2)}:1  ` +
-        `(needs ${minimum}:1 — ${use})`
+        `(needs ${minimum}:1 - ${use})`
     )
   }
 }

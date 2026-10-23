@@ -32,14 +32,25 @@ http
       return
     }
     if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html')
-    if (!fs.existsSync(file)) file = path.join(root, '404.html')
+    // Next's export writes /resume as resume.html, not resume/index.html.
+    if (!fs.existsSync(file) && !path.extname(file) && fs.existsSync(`${file}.html`)) {
+      file = `${file}.html`
+    }
+
+    // A path the export does not contain is a 404, not a 200 carrying the 404
+    // page: the status is the whole thing being checked here.
+    let status = 200
+    if (!fs.existsSync(file)) {
+      file = path.join(root, '404.html')
+      status = 404
+    }
 
     fs.readFile(file, (error, data) => {
       if (error) {
-        res.writeHead(404).end('not found')
+        res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }).end('not found')
         return
       }
-      res.writeHead(200, { 'content-type': types[path.extname(file)] || 'application/octet-stream' })
+      res.writeHead(status, { 'content-type': types[path.extname(file)] || 'application/octet-stream' })
       res.end(data)
     })
   })

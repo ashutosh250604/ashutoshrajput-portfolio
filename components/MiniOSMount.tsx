@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic'
  * of the server render that the static export writes.
  *
  * It still mounts on load, so the ⇧⌘O chord works as soon as the page is
- * interactive — the chunk arrives just after the rest of the JavaScript.
+ * interactive - the chunk arrives just after the rest of the JavaScript.
  */
 const MiniOS = dynamic(() => import('./MiniOS'), { ssr: false })
 

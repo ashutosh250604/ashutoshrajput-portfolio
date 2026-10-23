@@ -109,6 +109,8 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(true)}
               className="rounded-sm p-2 transition-colors hover:text-accent md:hidden"
               aria-label={t('a11y.openMenu')}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-nav"
             >
               <Menu className="h-5 w-5" />
             </button>

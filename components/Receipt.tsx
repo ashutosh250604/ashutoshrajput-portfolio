@@ -14,7 +14,7 @@ import { useShortcuts } from '@/lib/shortcuts'
  *
  * Every portfolio measures its visitors; almost none of them say so in a way
  * anybody reads. This one hands you the printout instead: the clock you are
- * reading by, the window you are reading in, the language you asked for — and
+ * reading by, the window you are reading in, the language you asked for - and
  * then the line that matters, that none of it left the browser. It is a small
  * joke about analytics that is also literally true.
  *
@@ -67,7 +67,7 @@ function readFacts(): Facts {
     screen: `${window.innerWidth} × ${window.innerHeight} @ ${
       Math.round((window.devicePixelRatio || 1) * 100) / 100
     }×`,
-    platform: uaData?.platform || navigator.platform || '—',
+    platform: uaData?.platform || navigator.platform || '-',
     // A receipt number, so the slip looks like one. Six digits of the clock.
     number: String(Date.now()).slice(-6),
   }

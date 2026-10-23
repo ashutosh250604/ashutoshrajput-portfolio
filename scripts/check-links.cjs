@@ -1,15 +1,15 @@
 /**
  * Link audit: every URL the site and the READMEs publish, actually fetched.
  *
- * The published surface is wide and mostly third-party — shields.io badges,
- * stats cards, two live demos, four social profiles — and it rots silently:
+ * The published surface is wide and mostly third-party - shields.io badges,
+ * stats cards, two live demos, four social profiles - and it rots silently:
  * a repo gets renamed, a free-tier host is deleted, a card service starts
  * asking for money. Nothing in the build notices, because nothing in the build
  * looks outward. This does.
  *
  * What counts as a failure, and why the line sits exactly there:
  *
- *   404 / 410 / other 4xx   FAIL    the link is gone — the only thing that fails
+ *   404 / 410 / other 4xx   FAIL    the link is gone - the only thing that fails
  *   403 / 406 / 429 / 999   BLOCKED a bot is being refused, not a visitor
  *   5xx                     DOWN    the host answered, the service did not
  *   connection error        UNREACHABLE, after one retry
@@ -17,7 +17,7 @@
  * Everything except the first is printed loudly and does not fail the run, and
  * each of those lines was measured rather than assumed. leetcode.com answers 403
  * and zendevx.com 406 to anything without a browser session; linkedin.com
- * answers 999 — its own invention — to a fetch carrying a full Chrome
+ * answers 999 - its own invention - to a fetch carrying a full Chrome
  * user-agent; and wault-upi.onrender.com, a free Render instance, misses the
  * first request after it has been asleep, answering 000, then 503, then 200
  * inside the same afternoon. None of those is a 404 for a visitor, and failing
@@ -77,7 +77,7 @@ function sourceFiles() {
 
   // The profile README lives in its own repository, one directory up. Its
   // badges are published URLs like any other, so it is scanned when it is
-  // there — and the run says so when it is not, because a silent skip would
+  // there - and the run says so when it is not, because a silent skip would
   // read as a pass.
   files.push(process.env.PROFILE_README
     ? path.resolve(process.env.PROFILE_README)
@@ -342,16 +342,16 @@ async function main() {
   const profileLabel = path.relative(root, profileReadme).split(path.sep).join('/')
 
   if (fs.existsSync(profileReadme)) {
-    console.log(`\nIncluded the profile repository's README (${profileLabel}) — its badges are published URLs too.`)
+    console.log(`\nIncluded the profile repository's README (${profileLabel}) - its badges are published URLs too.`)
   } else {
-    console.log(`\nSKIP     no profile README at ${profileLabel} — set PROFILE_README to check one.`)
+    console.log(`\nSKIP     no profile README at ${profileLabel} - set PROFILE_README to check one.`)
   }
 
   const total = urls.length + internalPaths.length + anchorKeys.length
   const warned = blocked + unreachable + down
 
   console.log(
-    `\n${total} checked — ${total - failures - warned} clean, ${failures} broken, ` +
+    `\n${total} checked - ${total - failures - warned} clean, ${failures} broken, ` +
       `${blocked} refused to a bot, ${down} not serving, ${unreachable} unreachable.`
   )
 
@@ -361,7 +361,7 @@ async function main() {
       console.log('The hosts listed above still need a human eye: a link that resolves is not the same as a service that is up.')
     }
   } else {
-    console.log('\nBroken links — fix the URL or drop the link.')
+    console.log('\nBroken links - fix the URL or drop the link.')
   }
 
   process.exit(failures === 0 ? 0 : 1)

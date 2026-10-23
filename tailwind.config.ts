@@ -40,7 +40,7 @@ const config: Config = {
         // `accent` is the one accent, tuned per theme so it is legible in both
         // roles it plays: as text on the paper (>= 4.5:1) and as a fill with
         // `accent-on` on top of it (>= 4.5:1). Never use primary-500/600 for
-        // text — that is what failed the contrast audit.
+        // text - that is what failed the contrast audit.
         accent: {
           DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
           strong: 'rgb(var(--accent-strong) / <alpha-value>)',

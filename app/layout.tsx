@@ -23,13 +23,13 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-san
 const mono = JetBrains_Mono({ subsets: ['latin'], display: 'swap', variable: '--font-mono' })
 
 export const metadata: Metadata = {
-  title: 'Ashutosh Rajput — Backend Developer',
+  title: 'Ashutosh Rajput - Backend Developer',
   description:
     'Ashutosh Rajput, backend developer in Bangalore. Python and Flask with SQL underneath, currently working on GenAI and on data structures and algorithms in Java.',
   keywords: ['Ashutosh Rajput', 'Backend Developer', 'Python', 'Flask', 'SQL', 'Java', 'Bangalore', 'Portfolio'],
   authors: [{ name: 'Ashutosh Rajput' }],
   openGraph: {
-    title: 'Ashutosh Rajput — Backend Developer',
+    title: 'Ashutosh Rajput - Backend Developer',
     description: 'Python and Flask with SQL underneath; GenAI and DSA in Java on the side.',
     type: 'website',
     url: 'https://ashutoshrajput-portfolio.vercel.app',

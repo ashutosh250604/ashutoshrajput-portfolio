@@ -132,7 +132,7 @@ const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`
 
 async function main() {
   if (!fs.existsSync(path.join(outDir, 'index.html'))) {
-    console.error('out/ is missing — run `npm run build` first.')
+    console.error('out/ is missing - run `npm run build` first.')
     process.exit(1)
   }
 

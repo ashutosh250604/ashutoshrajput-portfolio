@@ -9,8 +9,8 @@
  *                   scripts/make-resume.cjs printed it to public/resume.pdf
  *   the README      the GitHub profile README paraphrased each project by hand
  *
- * All three now read one file — public/translations/en.json, which the site
- * imports as its English defaults and the resume route prints from — plus the
+ * All three now read one file - public/translations/en.json, which the site
+ * imports as its English defaults and the resume route prints from - plus the
  * project facts in data/projects.ts. This script is what keeps the third one
  * honest, and it is also the thing that writes it:
  *
@@ -19,12 +19,12 @@
  *
  * What it compares:
  *
- *   1. that the facts and the English copy agree at all — every project in
+ *   1. that the facts and the English copy agree at all - every project in
  *      data/projects.ts has a title, a description and its declared number of
  *      highlights, and none of them is blank
  *   2. that the README's generated block is byte-identical to what the blurbs
  *      would produce right now
- *   3. that public/resume.pdf — a build artifact, easy to forget — still
+ *   3. that public/resume.pdf - a build artifact, easy to forget - still
  *      contains each project's current title and the two highlights the sheet
  *      prints, so an edited blurb cannot sit in the repo while the PDF on the
  *      site still says the old thing
@@ -51,7 +51,7 @@ const RESUME_HIGHLIGHTS = 2
 // ------------------------------------------------------------------ reading
 
 /**
- * data/projects.ts is TypeScript, so it is read as text — the same approach
+ * data/projects.ts is TypeScript, so it is read as text - the same approach
  * scripts/check-keys.cjs takes. Each entry runs from `id:` to its closing
  * brace; the fields are pulled out of that window.
  */
@@ -172,7 +172,7 @@ function renderTable(entries) {
 
 /**
  * Rendered with the README's own line endings. A Windows checkout holds CRLF,
- * and a block written with LF would compare unequal on every run — the check
+ * and a block written with LF would compare unequal on every run - the check
  * would report drift against a file that is in fact correct.
  */
 function renderBlock(entries, newline = '\n') {
@@ -251,7 +251,7 @@ function main() {
       }
     }
   } else {
-    console.log(`\nSKIP  no README at ${label} — set PROFILE_README to check one.`)
+    console.log(`\nSKIP  no README at ${label} - set PROFILE_README to check one.`)
   }
 
   // ---- the generated resume
@@ -259,7 +259,7 @@ function main() {
   let resumeState = 'SKIP'
 
   if (flat === null) {
-    console.log('SKIP  public/resume.pdf is absent — run `npm run resume` to build it.')
+    console.log('SKIP  public/resume.pdf is absent - run `npm run resume` to build it.')
   } else {
     const missing = []
     for (const entry of shaped) {
@@ -277,14 +277,14 @@ function main() {
     } else {
       resumeState = 'FAIL'
       failures += 1
-      console.log(`\nFAIL  public/resume.pdf is out of date — ${missing.length} line(s) no longer match:`)
+      console.log(`\nFAIL  public/resume.pdf is out of date - ${missing.length} line(s) no longer match:`)
       for (const item of missing) console.log(`      ${item}`)
       console.log('      Regenerate it with: npm run resume')
     }
   }
 
   console.log(
-    `\n${shaped.length} project(s) — blurbs ${problems.length ? 'FAIL' : 'ok'}, ` +
+    `\n${shaped.length} project(s) - blurbs ${problems.length ? 'FAIL' : 'ok'}, ` +
       `README ${readmeState}, resume ${resumeState}`
   )
 

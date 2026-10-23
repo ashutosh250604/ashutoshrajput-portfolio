@@ -12,7 +12,7 @@ import { useShortcuts } from '@/lib/shortcuts'
  *
  * The site claims to be set like a document, so here is the setting: the ruled
  * column, the guides that divide it, the baseline every line of copy sits on,
- * and the type scale — all measured from the page itself rather than declared
+ * and the type scale - all measured from the page itself rather than declared
  * here, so the overlay cannot describe a layout the page is not using.
  *
  * It is an instrument, not a modal. The page stays scrollable and clickable
@@ -56,7 +56,7 @@ const px = (value: string) => Math.round(parseFloat(value) || 0)
 /**
  * The ruled column.
  *
- * Selected by the property that makes it the column — the left hairline — and
+ * Selected by the property that makes it the column - the left hairline - and
  * not by position. The first `section > div` on the page is the hero's own
  * container, which carries no rule and no padding, so measuring by position
  * reported a gutter of zero and a column that was not the one being read.

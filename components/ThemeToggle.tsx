@@ -22,10 +22,16 @@ export default function ThemeToggle() {
   useEffect(() => {
     // The pre-paint script in layout.tsx has already decided the theme, so
     // this only syncs the button's own state with it.
-    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null
+    let saved: 'light' | 'dark' | null = null
+    try {
+      saved = localStorage.getItem('theme') as 'light' | 'dark' | null
+    } catch {
+      // Storage can be unavailable; the system preference still answers.
+    }
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const initial = saved ?? (prefersDark ? 'dark' : 'light')
 
+    setTheme(initial)
     apply(initial)
   }, [])
 
@@ -34,8 +40,12 @@ export default function ThemeToggle() {
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light'
     setTheme(next)
-    localStorage.setItem('theme', next)
     apply(next)
+    try {
+      localStorage.setItem('theme', next)
+    } catch {
+      // The choice still applies for this visit.
+    }
   }
 
   return (

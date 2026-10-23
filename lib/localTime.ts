@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 /**
- * A ticking clock on the site's own timezone, which is the owner's — the
+ * A ticking clock on the site's own timezone, which is the owner's - the
  * colophon labels it "Local time" and means his local time, so this is
  * Asia/Kolkata and not the visitor's device zone.
  *

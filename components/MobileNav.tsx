@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import Link from 'next/link'
 import Logo from './Logo'
 import { X } from 'lucide-react'
@@ -36,6 +36,25 @@ export default function MobileNav({ isOpen, onClose, navLinks, activeSection }: 
     }
   }, [isOpen, onClose])
 
+  // The panel is the only thing on screen; Tab must not walk into the page
+  // behind it.
+  const trapTab = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab') return
+    const focusable = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>('a[href], button')
+    ).filter((element) => element.offsetParent !== null)
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+
   if (!isOpen) return null
 
   return (
@@ -43,9 +62,11 @@ export default function MobileNav({ isOpen, onClose, navLinks, activeSection }: 
       <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={onClose} />
 
       <div
+        id="mobile-nav"
         role="dialog"
         aria-modal="true"
         aria-label={t('a11y.openMenu')}
+        onKeyDown={trapTab}
         className="absolute inset-y-0 right-0 flex w-72 max-w-[85vw] animate-slide-in-right flex-col border-l border-rule/15 bg-paper px-5 py-5"
       >
         <div className="flex items-center justify-between gap-4">

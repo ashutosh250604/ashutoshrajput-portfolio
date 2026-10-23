@@ -4,7 +4,7 @@ export interface Project {
   id: string
   /**
    * The short name, as the project is actually called: Wault, 7–8. The site
-   * shows the longer `project.<id>.title` instead ("Wault — a UPI-Style
+   * shows the longer `project.<id>.title` instead ("Wault - a UPI-Style
    * Wallet"); this is what the generated README links read as.
    */
   name: string

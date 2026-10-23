@@ -9,7 +9,7 @@ import { dealDeck } from './CardDeckEgg'
 import { startChaos } from './ChaosMode'
 import { eggs, openEggIndex, useFoundEggs, type EggId } from '@/lib/eggs'
 import { bindingHint, currentPlatform } from '@/lib/keys'
-import { startOS } from '@/lib/os'
+import { closeOS, startOS } from '@/lib/os'
 import { openBlueprint, openInk, openKeys, openProof, openReceipt, openSignal } from '@/lib/secrets'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -39,6 +39,8 @@ export default function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const pendingRef = useRef<PaletteItem | null>(null)
+  const returnFocusRef = useRef<HTMLElement | null>(null)
+  const openRef = useRef(false)
   const found = useFoundEggs()
   const platform = currentPlatform()
 
@@ -135,21 +137,31 @@ export default function CommandPalette() {
   }, [matches])
 
   useEffect(() => {
+    openRef.current = open
+  }, [open])
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
         setOpen((previous) => !previous)
         return
       }
-      if (event.key === 'Escape') setOpen(false)
+      if (event.key === 'Escape') {
+        // The palette is the top layer when it is up, so Escape belongs to it
+        // alone. Capture phase: the desktop and the key sheet listen further
+        // down the tree and must not close underneath it.
+        if (openRef.current) event.stopPropagation()
+        setOpen(false)
+      }
     }
 
     const onOpen = () => setOpen(true)
 
-    window.addEventListener('keydown', onKeyDown)
+    document.addEventListener('keydown', onKeyDown, true)
     window.addEventListener(OPEN_EVENT, onOpen)
     return () => {
-      window.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('keydown', onKeyDown, true)
       window.removeEventListener(OPEN_EVENT, onOpen)
     }
   }, [])
@@ -157,12 +169,17 @@ export default function CommandPalette() {
   useEffect(() => {
     if (!open) return
 
+    returnFocusRef.current = document.activeElement as HTMLElement | null
     setQuery('')
     setActive(0)
     lockScroll()
     inputRef.current?.focus()
 
-    return () => unlockScroll()
+    return () => {
+      unlockScroll()
+      const previous = returnFocusRef.current
+      if (previous && document.contains(previous)) previous.focus()
+    }
   }, [open])
 
   useEffect(() => {
@@ -199,6 +216,11 @@ export default function CommandPalette() {
   }
 
   const go = (item: PaletteItem) => {
+    // The palette can be opened over the desktop. Anything other than the
+    // desktop itself belongs to the page underneath, so the desktop leaves
+    // first rather than swallowing the thing that was just chosen.
+    if (item.action !== 'os') closeOS()
+
     if (item.action) {
       setOpen(false)
       doors[item.action]()
@@ -218,7 +240,7 @@ export default function CommandPalette() {
   const activeItem = matches[active]
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[12vh]">
+    <div className="fixed inset-0 z-[95] flex items-start justify-center px-4 pt-[12vh]">
       <div className="absolute inset-0 bg-black/40 animate-fade-in" onClick={() => setOpen(false)} />
 
       <div
@@ -254,7 +276,7 @@ export default function CommandPalette() {
             onKeyDown={(event) => {
               if (event.key === 'ArrowDown') {
                 event.preventDefault()
-                setActive((index) => Math.min(index + 1, matches.length - 1))
+                setActive((index) => Math.min(index + 1, Math.max(0, matches.length - 1)))
               } else if (event.key === 'ArrowUp') {
                 event.preventDefault()
                 setActive((index) => Math.max(index - 1, 0))

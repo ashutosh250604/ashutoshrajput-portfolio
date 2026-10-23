@@ -11,7 +11,7 @@ import { useShortcuts } from '@/lib/shortcuts'
 /**
  * Press proof: the site dressed as the proof sheet it would be printed from.
  *
- * A proof is what you check before the run — crop marks where the guillotine
+ * A proof is what you check before the run - crop marks where the guillotine
  * will cut, registration marks to see the inks line up, a bar of the inks in
  * use, and a slug carrying the revision. That is a genuine document behaviour
  * rather than a theme, which is why it suits a page that claims to be set like
@@ -20,7 +20,7 @@ import { useShortcuts } from '@/lib/shortcuts'
  * The ink bar is not decoration: each swatch reads its value from the same CSS
  * custom properties the site paints with, and re-reads them when the theme
  * class changes. So the bar is a live readout of the inks in use, and flipping
- * light to dark changes the bars in front of you — which is the one thing a
+ * light to dark changes the bars in front of you - which is the one thing a
  * proof sheet is actually for.
  */
 
@@ -198,7 +198,7 @@ export default function PressProof() {
           {INKS.map((ink, index) => (
             <div key={ink.token} className="flex items-baseline justify-between gap-3 py-1.5">
               <dt className="uppercase tracking-[0.14em] text-muted">{ink.label}</dt>
-              <dd className="tabular text-ink/90">{inks[index] ?? '—'}</dd>
+              <dd className="tabular text-ink/90">{inks[index] ?? '-'}</dd>
             </div>
           ))}
         </dl>

@@ -7,14 +7,14 @@ import { useEffect, useState } from 'react'
  *
  * A secret is only worth keeping if the next one is findable, so every egg
  * records itself here when it is opened. The colophon reads this list back and
- * only shows itself once something has been found — that is the whole point:
+ * only shows itself once something has been found - that is the whole point:
  * the index is the reward for finding your first one.
  *
  * Bindings are literals, not translated strings. They are key names, and they
  * are the same on every keyboard layout we could pretend to support.
  *
- * The register is also what each secret listens for — components spread
- * `bindingOf(id)` into useShortcuts rather than repeating their chord — so the
+ * The register is also what each secret listens for - components spread
+ * `bindingOf(id)` into useShortcuts rather than repeating their chord - so the
  * key sheet cannot advertise a trigger that no longer does anything.
  */
 export type EggId =

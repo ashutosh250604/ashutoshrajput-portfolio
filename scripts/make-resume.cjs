@@ -98,7 +98,7 @@ async function waitForServer(deadlineMs = 15000) {
 
 async function main() {
   if (!fs.existsSync(resumeHtml)) {
-    console.error('out/resume.html is missing — run `npm run build` (or `npm run resume`) first.')
+    console.error('out/resume.html is missing - run `npm run build` (or `npm run resume`) first.')
     process.exit(1)
   }
 
@@ -112,7 +112,7 @@ async function main() {
    * Never destroy a resume nobody else can recover. Two archives, because
    * there are two ways one arrives here: the copy that predates this script,
    * and a PDF put in public/resume.pdf by hand. The second is detected by
-   * difference — a file that is not the byte-for-byte output of the last run
+   * difference - a file that is not the byte-for-byte output of the last run
    * did not come from this script.
    */
   if (fs.existsSync(target)) {
@@ -187,7 +187,7 @@ async function main() {
 
     if (pdf.pageCount !== 1) {
       throw new Error(
-        `the resume is ${pdf.pageCount || 'an unknown number of'} pages (${size}) — trim content until it fits on one A4 sheet`
+        `the resume is ${pdf.pageCount || 'an unknown number of'} pages (${size}) - trim content until it fits on one A4 sheet`
       )
     }
 
@@ -195,7 +195,7 @@ async function main() {
       Math.abs(pdf.width - A4.width) > A4.tolerance ||
       Math.abs(pdf.height - A4.height) > A4.tolerance
     ) {
-      throw new Error(`the page is ${size}, not A4 (${A4.width}x${A4.height}pt) — check the @page rule`)
+      throw new Error(`the page is ${size}, not A4 (${A4.width}x${A4.height}pt) - check the @page rule`)
     }
 
     // Case-insensitive: the sheet sets some lines in small caps by CSS.
@@ -207,7 +207,7 @@ async function main() {
 
     const leaked = forbidden.filter((word) => flattened.includes(word.toLowerCase()))
     if (leaked.length) {
-      throw new Error(`the page furniture printed too (${leaked.join(', ')}) — check the print rules`)
+      throw new Error(`the page furniture printed too (${leaked.join(', ')}) - check the print rules`)
     }
 
     console.log(`page: ${pdf.pageCount} × A4 (${size})`)

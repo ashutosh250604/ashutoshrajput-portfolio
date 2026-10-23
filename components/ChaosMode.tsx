@@ -66,7 +66,7 @@ export default function ChaosMode() {
     return () => window.removeEventListener(OPEN_EVENT, onOpen)
   }, [])
 
-  // Found is found however it was reached — chord, palette, or another tab.
+  // Found is found however it was reached - chord, palette, or another tab.
   useEffect(() => {
     if (active) markEggFound('chaos')
   }, [active])

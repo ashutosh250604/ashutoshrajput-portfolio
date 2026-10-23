@@ -44,8 +44,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('language') as Language | null
-    if (saved && languages.some((entry) => entry.code === saved)) setLanguageState(saved)
+    try {
+      const saved = localStorage.getItem('language') as Language | null
+      if (saved && languages.some((entry) => entry.code === saved)) setLanguageState(saved)
+    } catch {
+      // Storage can be unavailable (private windows, blocked cookies); the
+      // page still reads, it just does not remember the choice.
+    }
   }, [])
 
   useEffect(() => {
@@ -85,7 +90,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang)
-    localStorage.setItem('language', lang)
+    try {
+      localStorage.setItem('language', lang)
+    } catch {
+      // Same as above: the visit works without being remembered.
+    }
   }, [])
 
   const t = useCallback(

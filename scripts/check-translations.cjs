@@ -3,7 +3,7 @@
  * the English source.
  *
  * That source is public/translations/en.json, which is also what the site
- * imports as its English defaults and what the /resume route prints from — so
+ * imports as its English defaults and what the /resume route prints from - so
  * this now checks the locales against the one file that matters, rather than
  * against a second copy of the English strings that used to be held inline in
  * contexts/LanguageContext.tsx. The parity test is the same; there is simply

@@ -6,9 +6,9 @@ import { useEffect, useRef } from 'react'
  * One place for every hidden keyboard trigger, so each easter egg pays only for
  * its own keys. Two shapes are supported:
  *
- * - `sequence` — keys typed in order anywhere on the page, matched against a
+ * - `sequence` - keys typed in order anywhere on the page, matched against a
  *   rolling buffer so a near miss never has to be cleared out of the way first.
- * - `chord` — a modifier combination, for people who do not want to type a
+ * - `chord` - a modifier combination, for people who do not want to type a
  *   dance to reach the thing.
  *
  * Both ignore keystrokes aimed at a form field: typing "deck" into the command
@@ -26,6 +26,12 @@ export interface Shortcut {
     /** Require ⌘ on macOS or Ctrl elsewhere. Omit for "do not care". */
     mod?: boolean
   }
+  /**
+   * Keep working while the mini desktop is up. Off by default: the desktop is
+   * its own screen, and a chord that opens a secret underneath it is a chord
+   * that appears to do nothing.
+   */
+  allowWhenDesktopOpen?: boolean
   run: () => void
 }
 
@@ -73,8 +79,12 @@ export function useShortcuts(shortcuts: Shortcut[], enabled = true) {
 
     const onKeyDown = (event: KeyboardEvent) => {
       const typing = isTyping(event.target)
+      const desktopOpen = document.body.dataset.desktop === 'open'
+      const available = desktopOpen
+        ? latest.current.filter((shortcut) => shortcut.allowWhenDesktopOpen)
+        : latest.current
 
-      for (const shortcut of latest.current) {
+      for (const shortcut of available) {
         if (!shortcut.chord) continue
         if (!chordMatches(shortcut.chord, event)) continue
         if (typing) return
@@ -93,7 +103,7 @@ export function useShortcuts(shortcuts: Shortcut[], enabled = true) {
 
       progress = [...progress, event.key.toLowerCase()].slice(-longest)
       const typed = progress.join(',')
-      const hit = latest.current.find((shortcut) =>
+      const hit = available.find((shortcut) =>
         sequenceMatches(shortcut.sequence ?? [], typed)
       )
       if (hit) {

@@ -93,8 +93,8 @@ body {
 
 /*
   The wash (see the `.wash` element in app/layout.tsx) lightens the top of a
-  tall page. It sits behind everything, and — because it is a sibling of the
-  content rather than an ancestor — the solid paper stays the effective
+  tall page. It sits behind everything, and - because it is a sibling of the
+  content rather than an ancestor - the solid paper stays the effective
   background of every text node, so contrast tooling can measure the page.
 */
 .wash {
@@ -183,7 +183,7 @@ body {
 
 /*
   Print: the page furniture is not part of a document. Only /resume is meant to
-  be printed, so this stays narrow — chrome out, paper in, nothing else.
+  be printed, so this stays narrow - chrome out, paper in, nothing else.
 */
 @media print {
   nav,
@@ -194,7 +194,7 @@ body {
 
   /*
     `color-scheme: dark` tells the browser the *paper* is dark, and it paints
-    the page margin in the dark canvas colour before any of our styles run — so
+    the page margin in the dark canvas colour before any of our styles run - so
     a resume printed from a dark-themed browser came out with a black frame
     around the sheet. Printing is always ink on white, whatever the visitor's
     theme says.

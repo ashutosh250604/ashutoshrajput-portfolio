@@ -10,13 +10,13 @@ import { useLanguage } from '@/contexts/LanguageContext'
 
 const OPEN_EVENT = 'portfolio:deal-deck'
 
-/** Opens the deck from anywhere — the command palette uses this. */
+/** Opens the deck from anywhere - the command palette uses this. */
 export function dealDeck() {
   window.dispatchEvent(new Event(OPEN_EVENT))
 }
 
 /**
- * A 7-8 deck: 30 cards, because the game drops the 6s — spades and hearts run
+ * A 7-8 deck: 30 cards, because the game drops the 6s - spades and hearts run
  * from 7 up, diamonds and clubs from 8.
  */
 const suits = [

@@ -4,7 +4,7 @@
  * Chrome prints with subset Identity-H fonts, so the visible text sits in
  * `<hex> Tj` runs that only make sense mapped back through each font's
  * ToUnicode CMap. This exists so `make-resume.cjs` can prove the finished PDF
- * really contains the resume — it is a check, not a general text extractor.
+ * really contains the resume - it is a check, not a general text extractor.
  */
 const fs = require('fs')
 const zlib = require('zlib')

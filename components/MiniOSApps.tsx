@@ -8,12 +8,13 @@ import skills from '@/data/skills'
 import { emailAddress } from '@/data/socials'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useLocalTime } from '@/lib/localTime'
+import type { OsAppId } from '@/lib/os'
 
 /**
  * What is inside the desktop's windows.
  *
- * Every one of these reads the same files the site and the resume read —
- * data/projects.ts, data/skills.ts, data/socials.ts and the English strings —
+ * Every one of these reads the same files the site and the resume read -
+ * data/projects.ts, data/skills.ts, data/socials.ts and the English strings -
  * so the desktop cannot claim anything the rest of the site does not. That is
  * also why the terminal is worth having: it is the site's own data, queryable.
  */
@@ -43,7 +44,7 @@ export function AboutApp() {
     { label: t('about.spec.focus'), value: t('about.focus') },
     { label: t('about.spec.stack'), value: t('about.spec.stackValue') },
     { label: t('about.spec.status'), value: t('hero.openToWork') },
-    { label: t('contact.localTime'), value: clock ?? '— —' },
+    { label: t('contact.localTime'), value: clock ?? '--:--' },
   ]
 
   return (
@@ -98,8 +99,8 @@ export function ProjectsApp() {
           <li key={project.id} className="py-3">
             <div className="flex items-baseline justify-between gap-4">
               <p className="text-[13px] text-white/90">{t(`project.${project.id}.title`)}</p>
-              <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
-                {t(`projects.status.${project.status}`)}
+              <span className="tabular shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
+                {project.year} · {t(`projects.status.${project.status}`)}
               </span>
             </div>
             <p className="mt-1 font-mono text-[10px] leading-relaxed text-white/55">
@@ -136,7 +137,7 @@ export function ResumeApp() {
         </span>
         <div>
           <p className="text-[13px] text-white/90">resume.pdf</p>
-          <p className="font-mono text-[10px] text-white/55">{t('contact.localTime')}: A4 · 1 page</p>
+          <p className="font-mono text-[10px] text-white/55">A4 · 1 page · PDF</p>
         </div>
       </div>
 
@@ -172,7 +173,13 @@ export function TrashApp() {
  * prints the same strings the About window renders, and `projects` prints the
  * same projects the projects section lists.
  */
-export function TerminalApp({ onExit }: { onExit: () => void }) {
+export function TerminalApp({
+  onExit,
+  onOpenApp,
+}: {
+  onExit: () => void
+  onOpenApp: (app: OsAppId) => void
+}) {
   const { t } = useLanguage()
   const [lines, setLines] = useState<string[]>([])
   const [input, setInput] = useState('')
@@ -220,19 +227,51 @@ export function TerminalApp({ onExit }: { onExit: () => void }) {
       'skills            what it was built with',
       'contact           where to reach him',
       'date              the clock in Bangalore',
+      'open <app>        open another window',
+      'pwd               where this shell thinks it is',
+      'history           what has been typed',
       'echo <text>       say it back',
       'clear             wipe the screen',
       'exit              leave the desktop',
     ]
 
+    const windows: Record<string, OsAppId> = {
+      projects: 'projects',
+      files: 'projects',
+      terminal: 'terminal',
+      about: 'about',
+      resume: 'resume',
+      trash: 'trash',
+    }
+
     return {
       help: () => help,
       ls: () => files,
-      whoami: () => [`${t('hero.name')} — ${t('hero.role.backend')}`],
+      whoami: () => [`${t('hero.name')} · ${t('hero.role.backend')}`],
       projects: () => contents['projects/'],
       skills: () => contents['skills.txt'],
       contact: () => contents['contact.txt'],
-      date: () => [new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(new Date())],
+      date: () => [
+        `${new Intl.DateTimeFormat('en-GB', {
+          dateStyle: 'full',
+          timeStyle: 'short',
+          timeZone: 'Asia/Kolkata',
+        }).format(new Date())} IST`,
+      ],
+      open: (args: string[]) => {
+        const requested = (args[0] ?? '').toLowerCase()
+        if (!requested) return ['open: which app? projects, terminal, about, resume or trash']
+        const app = windows[requested]
+        if (!app) return [`open: ${requested}: no such app`]
+        if (app === 'terminal') return ['open: the terminal is already open']
+        onOpenApp(app)
+        return [`open: ${app}`]
+      },
+      pwd: () => ['/home/visit/portfolio'],
+      history: () =>
+        history.length > 0
+          ? history.map((line, index) => `${String(index + 1).padStart(2, '0')}  ${line}`)
+          : ['history: nothing typed yet'],
       echo: (args: string[]) => [args.join(' ')],
       cat: (args: string[]) => {
         const name = args[0]
@@ -241,9 +280,9 @@ export function TerminalApp({ onExit }: { onExit: () => void }) {
         if (!found) return [`cat: ${name}: no such file`]
         return contents[found]
       },
-      sudo: () => ['nice try — you have read access here, same as everyone'],
+      sudo: () => ['nice try - you have read access here, same as everyone'],
     } as Record<string, (args: string[]) => string[]>
-  }, [contents, files, t])
+  }, [contents, files, history, onOpenApp, t])
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -275,7 +314,7 @@ export function TerminalApp({ onExit }: { onExit: () => void }) {
     const output = commands[command]
     setLines((previous) => [
       ...previous,
-      ...(output ? output(args) : [`${name}: command not found — try: help`]),
+      ...(output ? output(args) : [`${name}: command not found - try: help`]),
       '',
     ])
   }
@@ -301,8 +340,13 @@ export function TerminalApp({ onExit }: { onExit: () => void }) {
 
   return (
     <div className="flex h-full flex-col font-mono text-[11.5px] leading-relaxed">
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto pr-1 text-white/75">
-        <p className="text-white/55">{t('os.terminal')} — {t('hero.name')} · {t('hero.role.backend')}</p>
+      <div
+        ref={scrollRef}
+        role="log"
+        aria-live="polite"
+        className="min-h-0 flex-1 overflow-y-auto pr-1 text-white/75"
+      >
+        <p className="text-white/55">{t('os.terminal')} · {t('hero.name')} · {t('hero.role.backend')}</p>
         <p className="text-white/55">Type `help` and press return.</p>
         <p>&nbsp;</p>
         {lines.map((line, index) => (
@@ -313,7 +357,7 @@ export function TerminalApp({ onExit }: { onExit: () => void }) {
       </div>
 
       <label className="mt-3 flex items-center gap-2 border-t border-white/15 pt-2">
-        <span className="text-[color:var(--os-accent)]">%</span>
+        <span aria-hidden className="text-[color:var(--os-accent)]">%</span>
         <input
           ref={inputRef}
           value={input}

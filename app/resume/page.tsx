@@ -9,7 +9,7 @@ import { emailAddress } from '@/data/socials'
 /**
  * One page, printed. The content is the same content the site shows, pulled
  * from the same files: `data/projects.ts`, `data/skills.ts`,
- * `data/experience.ts` and the English strings — so the resume cannot drift
+ * `data/experience.ts` and the English strings - so the resume cannot drift
  * away from the portfolio.
  *
  * `scripts/make-resume.cjs` renders this route with headless Chrome and writes
@@ -18,7 +18,7 @@ import { emailAddress } from '@/data/socials'
  */
 
 export const metadata: Metadata = {
-  title: 'Ashutosh Rajput — Resume',
+  title: 'Ashutosh Rajput - Resume',
   description: 'One-page resume: backend developer, Python and Flask, Bangalore.',
   robots: { index: false },
 }
@@ -76,7 +76,7 @@ export default function Resume() {
           </div>
           <p className="sheet-summary">
             Backend developer with most of my work in Python and Flask over SQL: money movement, GST
-            billing, and the unglamorous parts that have to be exactly right — a PIN verified on the
+            billing, and the unglamorous parts that have to be exactly right - a PIN verified on the
             server, a backup that restores, a PDF whose totals agree. Currently going deep on data
             structures and algorithms in Java, and building small things with GenAI.
           </p>
@@ -96,7 +96,7 @@ export default function Resume() {
                   </span>
                 </h3>
                 <span className="entry-when">
-                  {shortDate(job.start)} — {shortDate(job.end)}
+                  {shortDate(job.start)} - {shortDate(job.end)}
                 </span>
               </div>
 
@@ -135,7 +135,7 @@ export default function Resume() {
                   {project.tech.join(' · ')}
                   {links.length > 0 ? (
                     <>
-                      {' — '}
+                      {' - '}
                       {links.map((link, index) => (
                         <span key={link.label}>
                           {index > 0 ? ', ' : ''}
@@ -144,7 +144,7 @@ export default function Resume() {
                       ))}
                     </>
                   ) : (
-                    ' — internal build, no public link'
+                    ' - internal build, no public link'
                   )}
                 </p>
 

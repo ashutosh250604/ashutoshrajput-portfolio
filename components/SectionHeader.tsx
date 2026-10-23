@@ -5,7 +5,7 @@ export interface SectionHeaderProps {
   index: string
   title: ReactNode
   subtitle?: string
-  /** Right-aligned monospace metadata, e.g. "04 projects · 2025 — 2026". */
+  /** Right-aligned monospace metadata, e.g. "04 projects · 2025 - 2026". */
   note?: string
 }
 

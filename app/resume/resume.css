@@ -155,7 +155,7 @@
 }
 
 .bullets li::before {
-  content: '—';
+  content: '-';
   position: absolute;
   left: 0;
   color: #0284c7;
