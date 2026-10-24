@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import LanguageToggle from './LanguageToggle'
@@ -23,19 +24,35 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  // The section links are anchors, so they only work on the page that has the
+  // sections. On the 404 and the resume they have to point back at the front
+  // page instead. Rendered as `true` on the server, then corrected on mount, so
+  // hydration still sees the markup it built.
+  const [onHome, setOnHome] = useState(true)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const pathname = usePathname()
   const { t } = useLanguage()
 
   const navLinks = navItems.map((item) => ({
     name: t(item.key),
-    href: item.href,
+    href: onHome ? item.href : `/${item.href}`,
     index: item.index,
   }))
 
+  // Keyed to the route: a client-side move from the 404 to the front page has
+  // to re-point the links and restart the section observer, or the nav keeps
+  // the previous page's idea of where the visitor is.
   useEffect(() => {
+    setOnHome(window.location.pathname === '/')
+
     const targets = navItems
       .map((item) => document.getElementById(item.href.slice(1)))
       .filter((element): element is HTMLElement => Boolean(element))
+
+    // The 404 and the resume have none of these sections. Without this they
+    // inherit the initial `home`, so the nav claims the visitor is on Home on
+    // every page that is not the front one.
+    if (targets.length === 0) setActiveSection('')
 
     // One observer instead of reading layout on every scroll event.
     const observer = new IntersectionObserver(
@@ -58,7 +75,7 @@ export default function Navbar() {
       observer.disconnect()
       window.removeEventListener('scroll', onScroll)
     }
-  }, [])
+  }, [pathname])
 
   return (
     <>

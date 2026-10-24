@@ -193,6 +193,15 @@ export default function CommandPalette() {
     if (open || !item) return
 
     pendingRef.current = null
+
+    // The 404 and the resume do not hold the front page's sections. A section
+    // chosen from either has to load the page that does, anchor included,
+    // rather than rewrite the URL to a heading that is not there.
+    if (window.location.pathname !== '/') {
+      window.location.assign(`/${item.href}`)
+      return
+    }
+
     document.getElementById(item.href.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     window.history.replaceState(null, '', item.href)
   }, [open])
