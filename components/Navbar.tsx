@@ -23,15 +23,22 @@ const navItems = [
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('home')
-  // The section links are anchors, so they only work on the page that has the
-  // sections. On the 404 and the resume they have to point back at the front
-  // page instead. Rendered as `true` on the server, then corrected on mount, so
-  // hydration still sees the markup it built.
-  const [onHome, setOnHome] = useState(true)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const pathname = usePathname()
   const { t } = useLanguage()
+
+  // The section links are anchors, so they only work on the page that has the
+  // sections. On the 404 and the resume they have to point back at the front
+  // page instead.
+  //
+  // This is read at render time rather than corrected after mount, so the
+  // exported HTML already carries `/#about` and the links work with JavaScript
+  // off. It is hydration-safe because the export and the browser agree on the
+  // path: `/` prerenders as `/`, `/resume` as `/resume`, and 404.html is built
+  // from the not-found route, which is never `/` and is then served for any
+  // miss. A hash-only href stays with `next/link` on the same page.
+  const onHome = pathname === '/'
+  const [activeSection, setActiveSection] = useState(onHome ? 'home' : '')
 
   const navLinks = navItems.map((item) => ({
     name: t(item.key),
@@ -43,15 +50,13 @@ export default function Navbar() {
   // to re-point the links and restart the section observer, or the nav keeps
   // the previous page's idea of where the visitor is.
   useEffect(() => {
-    setOnHome(window.location.pathname === '/')
-
     const targets = navItems
       .map((item) => document.getElementById(item.href.slice(1)))
       .filter((element): element is HTMLElement => Boolean(element))
 
-    // The 404 and the resume have none of these sections. Without this they
-    // inherit the initial `home`, so the nav claims the visitor is on Home on
-    // every page that is not the front one.
+    // The 404 and the resume have none of these sections, so there is nothing
+    // to observe and nothing to mark. Clearing it also covers a client-side
+    // move from the front page to one of them.
     if (targets.length === 0) setActiveSection('')
 
     // One observer instead of reading layout on every scroll event.
