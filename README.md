@@ -87,7 +87,7 @@ The script renders the page with headless Chrome or Edge (set `CHROME_PATH` if n
 ### Checking the build
 
 ```bash
-npm run check                 # em dashes, translations, key coverage, AA contrast, links, project blurbs
+npm run check                 # em dashes, translations, key coverage, AA contrast, exported section links, links, project blurbs
 npm run links                 # just the link audit, on its own
 npm run blurbs                # just the project-blurb drift check
 npm run blurbs:write          # regenerate the profile README's project table
@@ -102,6 +102,8 @@ It also includes `scripts/check-contrast.cjs`, which measures the theme tokens a
 It also includes `scripts/check-links.cjs`, which fetches every URL the site and the READMEs publish: it reads the TSX, the data files, the translation JSON and this README, and picks up the profile README one directory up (`PROFILE_README=/path/to/README.md` to point it elsewhere) - so social links, live demos, demo hosts and shields.io badges are all covered by the same run. A 404, a 410 or any other dead 4xx fails the run; internal `/paths` and `#anchors` are checked without the network, against `public/`, `app/` and the ids the components actually render.
 
 Two states are reported but do not fail: a host that refuses bots (403/406/429, and LinkedIn's 999) and one that is not serving yet (5xx, or a free instance still waking up). That line was drawn from measurement, not taste - `leetcode.com` answers 403 and a sleeping Render instance answers 503 to a first request and 200 to the next, so failing on those would only teach everyone to ignore the check. Both are printed loudly, because a link that resolves is not the same as a service that is up.
+
+It also includes `scripts/check-export-anchors.cjs`, which reads the export rather than the components: the nav is one component on every route, but its section links point at sections only the front page renders. On the 404 and the resume a bare `#about` scrolls nowhere, and with JavaScript off there is no router left to correct it, so the check fails when either page ships one. `#main` passes on its own, because every route renders its own skip target.
 
 ### One source for the project blurbs
 
