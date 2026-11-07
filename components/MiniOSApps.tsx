@@ -111,11 +111,11 @@ export function ProjectsApp() {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[12.5px] font-medium text-white/90">{title}</span>
-              <span className="mt-0.5 block truncate text-[11px] text-white/45">
+              <span className="mt-0.5 block truncate text-[11px] text-white/55">
                 {project.tech.join(' · ')}
               </span>
             </span>
-            <span className="tabular shrink-0 text-[10.5px] text-white/40">{project.year}</span>
+            <span className="tabular shrink-0 text-[10.5px] text-white/55">{project.year}</span>
             {href ? (
               <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-white/30 transition-colors group-hover:text-[color:var(--os-accent)]" />
             ) : null}
@@ -136,7 +136,7 @@ export function ProjectsApp() {
             ) : (
               <div className="flex items-center gap-3 px-2 py-2.5">
                 {body}
-                <span className="shrink-0 text-[10.5px] text-white/35">{t('projects.status.private')}</span>
+                <span className="shrink-0 text-[10.5px] text-white/55">{t('projects.status.private')}</span>
               </div>
             )}
           </li>
@@ -381,7 +381,7 @@ export function TerminalApp({
         ref={scrollRef}
         role="log"
         aria-live="polite"
-        className="min-h-0 flex-1 overflow-y-auto pr-1 text-white/75"
+        className="min-h-0 flex-1 select-text overflow-y-auto pr-1 text-white/75"
       >
         <p className="text-white/55">{t('os.terminal')} · {t('hero.name')} · {t('hero.role.backend')}</p>
         <p className="text-white/55">Type `help` and press return.</p>
@@ -396,7 +396,7 @@ export function TerminalApp({
         ))}
       </div>
 
-      <label className="mt-3 flex items-center gap-2 border-t border-white/15 pt-2">
+      <label className="mt-3 flex items-center gap-2 border-t border-white/15 pt-2 transition-colors focus-within:border-[color:var(--os-accent)]">
         <span aria-hidden className="text-[color:var(--os-accent)]">%</span>
         <input
           ref={inputRef}
@@ -406,6 +406,7 @@ export function TerminalApp({
           spellCheck={false}
           autoComplete="off"
           aria-label={t('os.terminal')}
+          data-terminal-input
           className="w-full bg-transparent text-white/90 outline-none placeholder:text-white/55"
           placeholder="help"
         />

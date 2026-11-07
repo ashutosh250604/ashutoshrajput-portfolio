@@ -104,12 +104,14 @@ export default function MiniOS() {
   const [power, setPower] = useState<PowerState>('booting')
   const [windows, setWindows] = useState<OsWindow[]>([])
   const [launcherOpen, setLauncherOpen] = useState(false)
+  const [focusRequest, setFocusRequest] = useState<{ app: OsAppId; nonce: number } | null>(null)
   const [compact, setCompact] = useState(() =>
     typeof window === 'undefined' ? false : isCompact()
   )
 
   const nextId = useRef(1)
   const topZ = useRef(10)
+  const focusNonce = useRef(0)
   const dragRef = useRef<{ id: number; dx: number; dy: number } | null>(null)
   const resizeRef = useRef<{ id: number; startX: number; startY: number; width: number; height: number } | null>(
     null
@@ -119,6 +121,7 @@ export default function MiniOS() {
 
   const leave = useCallback(() => {
     setLauncherOpen(false)
+    setFocusRequest(null)
     setOpen(false)
   }, [])
 
@@ -126,6 +129,7 @@ export default function MiniOS() {
     previousFocus.current = document.activeElement as HTMLElement | null
     setWindows([])
     setLauncherOpen(false)
+    setFocusRequest(null)
     setPower('booting')
     setOpen(true)
     markEggFound('os')
@@ -138,6 +142,7 @@ export default function MiniOS() {
    */
   const powerTo = useCallback((next: PowerState) => {
     setLauncherOpen(false)
+    setFocusRequest(null)
     setWindows([])
     setPower(next)
   }, [])
@@ -247,6 +252,21 @@ export default function MiniOS() {
     return () => window.removeEventListener('resize', fit)
   }, [open])
 
+  // A window is a keyboard destination, not just a layer. Opening or raising
+  // one moves focus into it (the terminal gets its prompt); otherwise focus
+  // stays in the app that is now behind and keystrokes go to the wrong window.
+  useEffect(() => {
+    if (!open || !focusRequest) return
+    const root = shellRef.current
+    if (!root) return
+
+    const selector =
+      focusRequest.app === 'terminal'
+        ? '[data-terminal-input]'
+        : `[data-window-app="${focusRequest.app}"] [data-window-title]`
+    root.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true })
+  }, [open, focusRequest])
+
   const focusWindow = useCallback((id: number) => {
     setWindows((previous) =>
       previous.map((entry) => (entry.id === id ? { ...entry, z: (topZ.current += 1) } : entry))
@@ -299,6 +319,10 @@ export default function MiniOS() {
         },
       ]
     })
+
+    // The effect above runs after the new front window has painted, so the
+    // title bar or terminal prompt exists when it asks for focus.
+    setFocusRequest({ app, nonce: (focusNonce.current += 1) })
   }, [])
 
   const closeWindow = useCallback((id: number) => {
@@ -502,7 +526,7 @@ export default function MiniOS() {
           <button
             type="button"
             onClick={() => setPower('running')}
-            className="text-[10.5px] text-white/45 underline-offset-4 hover:text-white/75 hover:underline"
+            className="text-[10.5px] text-white/60 underline-offset-4 hover:text-white/80 hover:underline"
           >
             {t('os.powerOn')}
           </button>
@@ -523,7 +547,7 @@ export default function MiniOS() {
             <button
               type="button"
               onClick={leave}
-              className="mt-3 text-[10.5px] text-white/45 underline-offset-4 hover:text-white/75 hover:underline"
+              className="mt-3 text-[10.5px] text-white/60 underline-offset-4 hover:text-white/80 hover:underline"
             >
               {t('os.menu.logout')}
             </button>
@@ -749,13 +773,36 @@ export default function MiniOS() {
                   aria-label={label}
                   aria-hidden={entry.minimised || undefined}
                   data-front={isFront ? 'true' : undefined}
+                  data-window-app={entry.app}
                   // Kept mounted while minimised: a terminal that forgets its
                   // scrollback when it is put away is not a terminal.
-                  onPointerDown={() => focusWindow(entry.id)}
-                  className={`absolute ${entry.minimised ? 'hidden' : 'flex'} animate-os-open flex-col overflow-hidden rounded-[10px] border backdrop-blur-xl ${
+                  onPointerDown={(event) => {
+                    focusWindow(entry.id)
+                    // A click on empty window chrome should put the caret in
+                    // this window. Links, buttons and fields keep their own
+                    // focus, and the title bar handles itself.
+                    const target = event.target as HTMLElement
+                    if (
+                      target.closest(
+                        'a, button, input, select, textarea, [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
+                      )
+                    ) {
+                      return
+                    }
+                    const focusTarget =
+                      entry.app === 'terminal'
+                        ? event.currentTarget.querySelector<HTMLElement>('[data-terminal-input]')
+                        : event.currentTarget.querySelector<HTMLElement>('[data-window-title]')
+                    focusTarget?.focus({ preventScroll: true })
+                  }}
+                  // Opaque, not frosted: a translucent window stacked over a
+                  // second window lets its text bleed through and makes both
+                  // read as blurred. The blur belongs to the chrome behind the
+                  // windows, not to the windows themselves.
+                  className={`absolute ${entry.minimised ? 'hidden' : 'flex'} animate-os-open flex-col overflow-hidden rounded-[10px] border ${
                     isFront
-                      ? 'border-white/25 bg-[#1c1c1f]/94 shadow-[0_36px_80px_-18px_rgba(0,0,0,0.95),0_0_0_1px_rgba(0,0,0,0.55)]'
-                      : 'border-white/10 bg-[#1c1c1f]/90 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.9)]'
+                      ? 'border-white/25 bg-[#1f1f23] shadow-[0_36px_80px_-18px_rgba(0,0,0,0.95),0_0_0_1px_rgba(0,0,0,0.55)]'
+                      : 'border-white/10 bg-[#19191c] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.9)]'
                   }`}
                   style={
                     filled
@@ -770,8 +817,14 @@ export default function MiniOS() {
                   }
                 >
                   <div
+                    data-window-title
                     tabIndex={0}
-                    onPointerDown={(event) => onTitlePointerDown(event, entry)}
+                    onPointerDown={(event) => {
+                      onTitlePointerDown(event, entry)
+                      if (!(event.target as HTMLElement).closest('button')) {
+                        event.currentTarget.focus({ preventScroll: true })
+                      }
+                    }}
                     onPointerMove={onTitlePointerMove}
                     onPointerUp={onTitlePointerUp}
                     onPointerCancel={onTitlePointerUp}
@@ -783,7 +836,7 @@ export default function MiniOS() {
                       if ((event.target as HTMLElement).closest('button')) return
                       zoomWindow(entry.id)
                     }}
-                    className={`relative flex h-[38px] shrink-0 touch-none items-center gap-2 border-b px-3 outline-offset-[-2px] ${
+                    className={`relative flex h-[38px] shrink-0 touch-none items-center gap-2 border-b px-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[color:var(--os-accent)] ${
                       isFront
                         ? 'border-white/10 bg-white/[0.055]'
                         : 'border-white/5 bg-white/[0.02]'
@@ -791,7 +844,11 @@ export default function MiniOS() {
                   >
                     {/* traffic lights. The glyphs stay hidden until the group
                         is hovered, the way a Mac shows them. */}
-                    <span className="group/lights relative z-10 flex shrink-0 items-center gap-[8px]">
+                    <span
+                      className={`group/lights relative z-10 flex shrink-0 items-center gap-[8px] transition-opacity ${
+                        isFront ? '' : 'opacity-60'
+                      }`}
+                    >
                       <button
                         type="button"
                         onPointerDown={(event) => event.stopPropagation()}
