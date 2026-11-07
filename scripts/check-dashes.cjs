@@ -16,7 +16,7 @@ const path = require('path')
 
 const ROOT = path.resolve(__dirname, '..')
 const EM = '\u2014'
-const SKIP_DIRS = new Set(['node_modules', '.next', '.git', 'out'])
+const SKIP_DIRS = new Set(['node_modules', '.next', '.git', 'out', '.cloud-attachments'])
 const TEXT_EXTENSIONS = new Set([
   '.ts',
   '.tsx',

@@ -38,6 +38,7 @@ next-env.d.ts
 
 # local agent scratch space
 .freebuff/
+.cloud-attachments/
 
 # copies of pre-existing source files kept for diffing
 .resume-backup/
