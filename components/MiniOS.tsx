@@ -4,25 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // Imported as a namespace for its event and style types; the DOM's own event
 // types are used unqualified alongside them.
 import type * as React from 'react'
-import {
-  FileText,
-  Folder,
-  Info,
-  Maximize2,
-  Minimize2,
-  Minus,
-  Power,
-  RotateCcw,
-  Terminal as TerminalIcon,
-  Trash2,
-  X,
-} from 'lucide-react'
+import { Info, LogOut, Maximize2, Minimize2, Minus, Power, RotateCcw, Search, Wifi, X } from 'lucide-react'
 import { lockScroll, unlockScroll } from '@/lib/scrollLock'
 import { useShortcuts } from '@/lib/shortcuts'
 import { bindingOf, markEggFound } from '@/lib/eggs'
 import { useLocalTime } from '@/lib/localTime'
 import { OS_CLOSE_EVENT, OS_EVENT, type OsAppId } from '@/lib/os'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { openPalette } from './CommandPalette'
+import { AppIcon, BatteryGlyph } from './MiniOSIcons'
 import { AboutApp, ProjectsApp, ResumeApp, TerminalApp, TrashApp } from './MiniOSApps'
 
 type PowerState = 'booting' | 'running' | 'off'
@@ -43,7 +33,6 @@ interface OsWindow {
 interface AppMeta {
   id: OsAppId
   labelKey: string
-  icon: typeof Folder
   width: number
   height: number
   minWidth: number
@@ -51,8 +40,8 @@ interface AppMeta {
 }
 
 /** Menu bar and dock reserve their own space; windows live between them. */
-const BAR = 34
-const DOCK = 76
+const BAR = 30
+const DOCK = 78
 /** Long enough to read the word "starting", short enough not to be a wait. */
 const BOOT_MS = 1600
 /** Arrow keys move a window by this much, four times that with shift. */
@@ -61,14 +50,15 @@ const NUDGE = 16
 const COMPACT = 640
 
 const APPS: AppMeta[] = [
-  { id: 'projects', labelKey: 'nav.projects', icon: Folder, width: 440, height: 400, minWidth: 300, minHeight: 240 },
-  { id: 'terminal', labelKey: 'os.terminal', icon: TerminalIcon, width: 560, height: 380, minWidth: 340, minHeight: 240 },
-  { id: 'about', labelKey: 'about.title', icon: Info, width: 430, height: 420, minWidth: 300, minHeight: 260 },
-  { id: 'resume', labelKey: 'hero.resume', icon: FileText, width: 400, height: 300, minWidth: 300, minHeight: 220 },
-  { id: 'trash', labelKey: 'os.trash', icon: Trash2, width: 380, height: 260, minWidth: 280, minHeight: 200 },
+  { id: 'projects', labelKey: 'nav.projects', width: 460, height: 400, minWidth: 300, minHeight: 240 },
+  { id: 'terminal', labelKey: 'os.terminal', width: 560, height: 380, minWidth: 340, minHeight: 240 },
+  { id: 'about', labelKey: 'about.title', width: 430, height: 440, minWidth: 300, minHeight: 260 },
+  { id: 'resume', labelKey: 'hero.resume', width: 430, height: 320, minWidth: 300, minHeight: 240 },
+  { id: 'trash', labelKey: 'os.trash', width: 380, height: 280, minWidth: 280, minHeight: 200 },
 ]
 
 const APP_IDS = APPS.map((entry) => entry.id)
+const DOCK_MAIN = APP_IDS.filter((id) => id !== 'trash')
 
 const clamp = (value: number, low: number, high: number) => Math.min(Math.max(value, low), Math.max(low, high))
 
@@ -91,16 +81,19 @@ function isCompact() {
 /**
  * A desktop, hidden behind ⇧⌘O.
  *
- * It is built from the site's own parts rather than as a macOS imitation: the
- * windows are hairline-ruled plates, the labels are monospace metadata, and
- * every app reads data/projects.ts, data/skills.ts and data/socials.ts - the
- * same files the sections and the resume read. The screen is dark in both
- * themes on purpose: it is a screen, and one fixed palette keeps the window
- * chrome measurable instead of doubling the contrast surface.
+ * It is a Mac made of the site's own data. The chrome is the part that has to
+ * be convincing - a menu bar that reports the front app, a system menu, a
+ * floating Dock and windows with centred titles and traffic lights - while
+ * every app inside still reads data/projects.ts, data/skills.ts and
+ * data/socials.ts, the same files the sections and the resume read.
+ *
+ * The screen stays dark in both themes on purpose: it is a screen, and one
+ * fixed palette keeps the chrome measurable instead of doubling the contrast
+ * surface. The wallpaper is drawn in CSS, so there is nothing to download.
  *
  * It is a modal toy, so it gives three ways out (Escape, the menu bar's power
- * button, and the launcher's own item) and it hands the page back exactly as it
- * found it.
+ * button, and the system menu's log out) and it hands the page back exactly as
+ * it found it.
  */
 export default function MiniOS() {
   const { t } = useLanguage()
@@ -216,7 +209,7 @@ export default function MiniOS() {
         return
       }
 
-      // The launcher closes first: it is the most recent thing opened.
+      // The system menu closes first: it is the most recent thing opened.
       if (launcherOpen) setLauncherOpen(false)
       else leave()
     }
@@ -287,7 +280,6 @@ export default function MiniOS() {
       const base = single ? [] : previous
       // Cascade, so a second window never lands exactly on the first.
       const step = (base.length % 5) * 24
-      // Keep the floating windows clear of the shortcut column on the left.
       const preferredX = Math.round((area.width - width) / 2) - 60 + step
       const maxX = Math.max(12, area.width - width - 12)
       const minX = Math.min(96, maxX)
@@ -460,7 +452,6 @@ export default function MiniOS() {
     .reduce<OsWindow | null>((top, entry) => (!top || entry.z > top.z ? entry : top), null)
   const focusedLabel = focused ? t(APPS.find((entry) => entry.id === focused.app)!.labelKey) : t('os.palette')
   const frontId = focused?.id
-  const runningApps = new Set(windows.map((entry) => entry.app))
 
   return (
     <div
@@ -489,50 +480,50 @@ export default function MiniOS() {
           first.focus()
         }
       }}
-      className="fixed inset-0 z-[88] overflow-hidden bg-[#0a0a0b] outline-none"
-      style={{ '--os-accent': '#58a6ff' } as React.CSSProperties}
+      className="fixed inset-0 z-[88] select-none overflow-hidden bg-[#050609] text-white outline-none"
+      style={{ '--os-accent': '#0a84ff' } as React.CSSProperties}
     >
       {power === 'booting' ? (
-        <div className="flex h-full flex-col items-center justify-center gap-7 px-6">
+        <div className="flex h-full flex-col items-center justify-center gap-8 px-6">
           <span
             aria-hidden
-            className="grid h-14 w-14 place-items-center rounded-[4px] border border-white/25 font-mono text-base tracking-[0.08em] text-white/85"
+            className="grid h-16 w-16 place-items-center rounded-[14px] border border-white/20 bg-white/[0.07] font-mono text-[17px] tracking-[0.06em] text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
           >
             AR
           </span>
-          <div className="w-44">
+          <div className="w-52">
             <div aria-hidden className="h-[3px] w-full overflow-hidden rounded-full bg-white/15">
               <div className="h-full animate-os-boot rounded-full bg-white/80" />
             </div>
-            <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-white/55">
+            <p className="mt-3 text-center text-[11px] text-white/55">
               {t('os.booting')}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setPower('running')}
-            className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/55 underline-offset-4 hover:text-white/80 hover:underline"
+            className="text-[10.5px] text-white/45 underline-offset-4 hover:text-white/75 hover:underline"
           >
             {t('os.powerOn')}
           </button>
         </div>
       ) : power === 'off' ? (
-        <div className="flex h-full flex-col items-center justify-center gap-6 px-6">
+        <div className="flex h-full flex-col items-center justify-center gap-6 bg-black px-6">
           <button
             type="button"
             onClick={() => powerTo('booting')}
             aria-label={t('os.powerOn')}
             title={t('os.powerOn')}
-            className="grid h-16 w-16 place-items-center rounded-full border border-white/25 text-white/70 transition-colors hover:border-white/60 hover:text-white/95"
+            className="grid h-16 w-16 place-items-center rounded-full border border-white/20 text-white/65 transition-colors hover:border-white/50 hover:text-white"
           >
             <Power className="h-6 w-6" />
           </button>
           <div className="text-center">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/70">{t('os.off')}</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/60">{t('os.off')}</p>
             <button
               type="button"
               onClick={leave}
-              className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/55 underline-offset-4 hover:text-white/80 hover:underline"
+              className="mt-3 text-[10.5px] text-white/45 underline-offset-4 hover:text-white/75 hover:underline"
             >
               {t('os.menu.logout')}
             </button>
@@ -540,65 +531,87 @@ export default function MiniOS() {
         </div>
       ) : (
         <>
-          {/* the screen the desktop is drawn on */}
+          {/* ---- wallpaper ---- */}
           <div
             aria-hidden
             className="absolute inset-0"
             style={{
               background:
-                'radial-gradient(120% 85% at 18% -10%, #1b2532 0%, #0e1116 45%, #08080a 100%)',
+                'radial-gradient(125% 100% at 12% 8%, #23496f 0%, #142c45 34%, #0b1622 64%, #05070a 100%)',
+            }}
+          />
+          <div aria-hidden className="absolute -left-[14%] top-[4%] h-[58vh] w-[64vw] rounded-full bg-[#3d8fc7]/30 blur-[130px]" />
+          <div aria-hidden className="absolute -right-[10%] -top-[14%] h-[56vh] w-[50vw] rounded-full bg-[#705aa0]/25 blur-[140px]" />
+          <div aria-hidden className="absolute bottom-[-20%] left-[16%] h-[58vh] w-[58vw] rounded-full bg-[#1c7472]/25 blur-[150px]" />
+          <div aria-hidden className="absolute bottom-[2%] right-[4%] h-[38vh] w-[34vw] rounded-full bg-[#d69a58]/[0.12] blur-[120px]" />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(120% 110% at 50% 42%, transparent 42%, rgba(0,0,0,0.42) 100%)',
             }}
           />
           <div
             aria-hidden
-            className="absolute inset-0 opacity-70"
+            className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
             style={{
               backgroundImage:
-                'linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)',
-              backgroundSize: '46px 46px',
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.65'/%3E%3C/svg%3E\")",
             }}
           />
 
           {/* ---- menu bar ---- */}
-          <div className="relative z-[3] flex h-[34px] items-center justify-between gap-3 border-b border-white/10 bg-black/35 px-2 backdrop-blur-sm sm:px-3">
-            <div className="flex min-w-0 items-center gap-2">
+          <div className="relative z-[3] flex h-[30px] items-center justify-between gap-2 border-b border-black/25 bg-[#0a0b0e]/45 px-2 text-[12px] text-white/90 shadow-[inset_0_-1px_0_rgba(255,255,255,0.05)] backdrop-blur-2xl">
+            <div className="flex min-w-0 items-center gap-1">
               <button
                 type="button"
                 onClick={() => setLauncherOpen((open) => !open)}
                 aria-expanded={launcherOpen}
-                aria-haspopup="dialog"
-                aria-label={t('os.menu')}
+                aria-haspopup="menu"
+                aria-label={`${focusedLabel}, ${t('os.menu')}`}
                 title={t('os.menu')}
-                className={`flex items-center gap-2 rounded-sm px-1.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors ${
-                  launcherOpen
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/75 hover:bg-white/10 hover:text-white'
+                className={`flex h-[23px] min-w-0 items-center gap-1.5 rounded-[4px] px-1.5 transition-colors ${
+                  launcherOpen ? 'bg-white/15 text-white' : 'hover:bg-white/10'
                 }`}
               >
                 <span
                   aria-hidden
-                  className="grid h-4 w-4 place-items-center rounded-[2px] border border-white/30 text-[7px]"
+                  className="grid h-[15px] w-[15px] shrink-0 place-items-center rounded-[3px] border border-white/30 text-[7px] font-semibold leading-none"
                 >
                   AR
                 </span>
-                <span className="max-w-[7.5rem] truncate">{focusedLabel}</span>
+                <span className="truncate font-semibold text-white/95">{focusedLabel}</span>
               </button>
-              <span aria-hidden className="hidden h-3 w-px bg-white/15 sm:block" />
-              <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-white/50 sm:block">
-                {today ?? ''}
-              </span>
             </div>
 
-            <div className="flex shrink-0 items-center gap-1.5">
-              <span className="tabular font-mono text-[11px] text-white/75">{clock ?? '--:--'}</span>
+            <div className="flex shrink-0 items-center gap-0.5 text-white/80">
+              <button
+                type="button"
+                onClick={() => {
+                  setLauncherOpen(false)
+                  openPalette()
+                }}
+                aria-label={t('a11y.openPalette')}
+                title={t('a11y.openPalette')}
+                className="grid h-[23px] w-[26px] place-items-center rounded-[4px] transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <Search className="h-[14px] w-[14px]" />
+              </button>
+              <span aria-hidden className="hidden items-center gap-2.5 px-1.5 sm:flex">
+                <Wifi className="h-[15px] w-[15px]" />
+                <BatteryGlyph />
+              </span>
+              <span className="hidden px-1.5 md:block">{today ?? ''}</span>
+              <span className="tabular px-1 text-white/85">{clock ?? '--:--'}</span>
               <button
                 type="button"
                 onClick={leave}
                 aria-label={t('os.menu.logout')}
                 title={t('os.menu.logout')}
-                className="rounded-sm p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                className="grid h-[23px] w-[26px] place-items-center rounded-[4px] text-white/70 transition-colors hover:bg-white/10 hover:text-white"
               >
-                <Power className="h-3.5 w-3.5" />
+                <Power className="h-[13px] w-[13px]" />
               </button>
             </div>
 
@@ -612,65 +625,77 @@ export default function MiniOS() {
                   className="fixed inset-0 z-[1] cursor-default"
                 />
                 <div
-                  role="dialog"
+                  role="menu"
                   aria-label={t('os.menu')}
-                  className="absolute left-1.5 top-[calc(100%+4px)] z-[2] max-h-[calc(100dvh-44px)] w-[17rem] animate-slide-down overflow-y-auto rounded-[6px] border border-white/15 bg-[#151517]/97 p-2 shadow-[0_20px_50px_-16px_rgba(0,0,0,0.9)] backdrop-blur sm:left-3"
+                  className="absolute left-1 top-[calc(100%+5px)] z-[2] max-h-[calc(100dvh-44px)] w-[264px] animate-slide-down overflow-y-auto rounded-[10px] border border-white/15 bg-[#1c1c1f]/85 p-1.5 text-[12.5px] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.9)] backdrop-blur-2xl"
                 >
-                  <p className="px-1 pb-2 font-mono text-[9px] uppercase tracking-[0.2em] text-white/45">
-                    {t('os.palette')}
-                  </p>
-
-                  <div className="grid grid-cols-3 gap-1">
-                    {APPS.map((meta) => {
-                      const Icon = meta.icon
-                      return (
-                        <button
-                          key={meta.id}
-                          type="button"
-                          onClick={() => openApp(meta.id)}
-                          className="flex flex-col items-center gap-1.5 rounded-sm px-1 py-2.5 transition-colors hover:bg-white/10"
-                        >
-                          <Icon className="h-5 w-5 text-white/80" />
-                          <span className="max-w-full truncate font-mono text-[9px] text-white/70">
-                            {t(meta.labelKey)}
-                          </span>
-                        </button>
-                      )
-                    })}
+                  <div role="presentation" className="flex items-center gap-2.5 px-2 pb-2 pt-1.5">
+                    <span
+                      aria-hidden
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/20 bg-gradient-to-b from-white/20 to-white/5 text-[10px] font-semibold tracking-[0.04em] text-white/90"
+                    >
+                      AR
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[12.5px] font-semibold text-white/95">{t('hero.name')}</p>
+                      <p className="truncate text-[10.5px] text-white/50">{t('os.palette')}</p>
+                    </div>
                   </div>
 
-                  <span aria-hidden className="my-2 block h-px bg-white/10" />
+                  <div role="separator" aria-hidden className="my-1 h-px bg-white/10" />
+
+                  {APPS.filter((meta) => meta.id !== 'about').map((meta) => (
+                    <button
+                      key={meta.id}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => openApp(meta.id)}
+                      className="group flex w-full items-center gap-2.5 rounded-[5px] px-2 py-[5px] text-left text-white/90 transition-colors hover:bg-[#0a6fd8] hover:text-white"
+                    >
+                      <AppIcon app={meta.id} size={19} />
+                      <span className="truncate">{t(meta.labelKey)}</span>
+                    </button>
+                  ))}
+
+                  <div role="separator" aria-hidden className="my-1 h-px bg-white/10" />
 
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={() => openApp('about')}
-                    className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left font-mono text-[11px] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2.5 rounded-[5px] px-2 py-[5px] text-left text-white/90 transition-colors hover:bg-[#0a6fd8] hover:text-white"
                   >
-                    <Info className="h-3.5 w-3.5" />
+                    <Info className="h-[15px] w-[15px] shrink-0 opacity-80" />
                     {t('os.menu.about')}
                   </button>
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={() => powerTo('booting')}
-                    className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left font-mono text-[11px] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2.5 rounded-[5px] px-2 py-[5px] text-left text-white/90 transition-colors hover:bg-[#0a6fd8] hover:text-white"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-[15px] w-[15px] shrink-0 opacity-80" />
                     {t('os.menu.restart')}
                   </button>
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={() => powerTo('off')}
-                    className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left font-mono text-[11px] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2.5 rounded-[5px] px-2 py-[5px] text-left text-white/90 transition-colors hover:bg-[#0a6fd8] hover:text-white"
                   >
-                    <Power className="h-3.5 w-3.5" />
+                    <Power className="h-[15px] w-[15px] shrink-0 opacity-80" />
                     {t('os.menu.shutdown')}
                   </button>
+
+                  <div role="separator" aria-hidden className="my-1 h-px bg-white/10" />
+
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={leave}
-                    className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left font-mono text-[11px] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2.5 rounded-[5px] px-2 py-[5px] text-left text-white/90 transition-colors hover:bg-[#0a6fd8] hover:text-white"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <LogOut className="h-[15px] w-[15px] shrink-0 opacity-80" />
                     {t('os.menu.logout')}
                   </button>
                 </div>
@@ -678,47 +703,38 @@ export default function MiniOS() {
             ) : null}
           </div>
 
-          {/*
-            * ---- desktop ----
-            *
-            * `z-0` is load-bearing: without a z-index here this element creates no
-            * stacking context, so the windows' inline `zIndex` (they stack in tens)
-            * would resolve against the root and paint over the menu bar's launcher
-            * and the dock - the items behind a window stop being clickable.
-            * Containing them keeps the chrome on top of the screen, which is the
-            * only order that works.
-            */}
-          <div className="absolute inset-x-0 bottom-[76px] top-[34px] z-0">
-            {/* Desktop shortcuts: the same apps the dock carries, for a hand
-                that reaches for the screen first. */}
-            <div
-              className={`absolute left-2 top-2 flex-col gap-2 sm:left-3 sm:top-3 sm:gap-3 ${
-                compact && windows.length > 0 ? 'hidden' : 'flex'
-              }`}
-            >
-              {(['projects', 'resume', 'terminal'] as OsAppId[]).map((app) => {
-                const meta = APPS.find((entry) => entry.id === app)!
-                const Icon = meta.icon
-                const isRunning = windows.some((entry) => entry.app === app)
-                return (
-                  <button
-                    key={app}
-                    type="button"
-                    onClick={() => openApp(app)}
-                    className="group flex w-[76px] flex-col items-center gap-1.5 rounded-sm p-1.5 transition-colors hover:bg-white/10 focus-visible:bg-white/10"
-                  >
-                    <Icon
-                      className={`h-7 w-7 transition-colors ${
-                        isRunning ? 'text-white/90' : 'text-white/65 group-hover:text-[color:var(--os-accent)]'
-                      }`}
-                    />
-                    <span className="max-w-full truncate font-mono text-[9px] text-white/70">
-                      {app === 'resume' ? 'resume.pdf' : t(meta.labelKey)}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+          {/* ---- desktop ---- */}
+          <div className="absolute inset-x-0 bottom-[78px] top-[30px] z-0">
+            {/* Desktop icons live on the right, where a Mac keeps them. */}
+            {compact ? null : (
+              <div className="absolute right-3 top-3 flex flex-col gap-4">
+                {(['projects', 'resume', 'terminal'] as OsAppId[]).map((app) => {
+                  const meta = APPS.find((entry) => entry.id === app)!
+                  const isRunning = windows.some((entry) => entry.app === app)
+                  return (
+                    <button
+                      key={app}
+                      type="button"
+                      onClick={() => openApp(app)}
+                      className="group flex w-[88px] flex-col items-center gap-1.5 rounded-[8px] p-1.5 transition-colors hover:bg-white/10 focus-visible:bg-white/10"
+                    >
+                      <span className="relative">
+                        <AppIcon app={app} size={54} className="transition-transform duration-150 group-hover:-translate-y-0.5" />
+                        {isRunning ? (
+                          <span
+                            aria-hidden
+                            className="absolute -right-1 -top-1 h-2 w-2 rounded-full border border-white/40 bg-[#0a84ff]"
+                          />
+                        ) : null}
+                      </span>
+                      <span className="max-w-full truncate text-[11px] font-medium text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+                        {app === 'resume' ? 'resume.pdf' : t(meta.labelKey)}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
 
             {windows.map((entry) => {
               const meta = APPS.find((app) => app.id === entry.app)!
@@ -736,9 +752,11 @@ export default function MiniOS() {
                   // Kept mounted while minimised: a terminal that forgets its
                   // scrollback when it is put away is not a terminal.
                   onPointerDown={() => focusWindow(entry.id)}
-                  className={`absolute ${entry.minimised ? 'hidden' : 'flex'} animate-os-open flex-col overflow-hidden rounded-[6px] bg-[#151517]/97 shadow-[0_28px_70px_-24px_rgba(0,0,0,0.95)] ${
-                    isFront ? 'border border-white/30' : 'border border-white/12'
-                  } ${filled ? '' : 'backdrop-blur-sm'}`}
+                  className={`absolute ${entry.minimised ? 'hidden' : 'flex'} animate-os-open flex-col overflow-hidden rounded-[10px] border backdrop-blur-xl ${
+                    isFront
+                      ? 'border-white/25 bg-[#1c1c1f]/94 shadow-[0_36px_80px_-18px_rgba(0,0,0,0.95),0_0_0_1px_rgba(0,0,0,0.55)]'
+                      : 'border-white/10 bg-[#1c1c1f]/90 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.9)]'
+                  }`}
                   style={
                     filled
                       ? { left: 8, top: 8, right: 8, bottom: 8, zIndex: entry.z }
@@ -765,26 +783,27 @@ export default function MiniOS() {
                       if ((event.target as HTMLElement).closest('button')) return
                       zoomWindow(entry.id)
                     }}
-                    className={`flex shrink-0 touch-none select-none items-center gap-2.5 border-b px-2.5 py-2 outline-offset-[-2px] ${
+                    className={`relative flex h-[38px] shrink-0 touch-none items-center gap-2 border-b px-3 outline-offset-[-2px] ${
                       isFront
-                        ? 'border-white/15 bg-white/[0.07]'
-                        : 'border-white/10 bg-white/[0.03]'
+                        ? 'border-white/10 bg-white/[0.055]'
+                        : 'border-white/5 bg-white/[0.02]'
                     } ${filled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'}`}
                   >
-                    {/* the three dots: close, minimise, fill. The hit area is
-                        a few pixels larger than the dot so a thumb can find
-                        it; the gap between them is wide enough that the three
-                        targets do not overlap. */}
-                    <span className="flex shrink-0 items-center gap-2">
+                    {/* traffic lights. The glyphs stay hidden until the group
+                        is hovered, the way a Mac shows them. */}
+                    <span className="group/lights relative z-10 flex shrink-0 items-center gap-[8px]">
                       <button
                         type="button"
                         onPointerDown={(event) => event.stopPropagation()}
                         onClick={() => closeWindow(entry.id)}
                         aria-label={t('os.window.close')}
                         title={t('os.window.close')}
-                        className="relative grid h-3.5 w-3.5 place-items-center rounded-full bg-[#ff5f57]/85 text-black/60 transition-colors after:absolute after:-inset-1 after:rounded-full after:content-[''] hover:bg-[#ff5f57]"
+                        className="relative grid h-[12px] w-[12px] place-items-center rounded-full bg-[#ff5f57] after:absolute after:-inset-[5px] after:rounded-full after:content-['']"
                       >
-                        <X className="h-2.5 w-2.5" />
+                        <X
+                          className="h-[8px] w-[8px] text-black/55 opacity-0 transition-opacity group-hover/lights:opacity-100"
+                          strokeWidth={3}
+                        />
                       </button>
                       <button
                         type="button"
@@ -792,9 +811,12 @@ export default function MiniOS() {
                         onClick={() => minimiseWindow(entry.id)}
                         aria-label={t('os.window.minimise')}
                         title={t('os.window.minimise')}
-                        className="relative grid h-3.5 w-3.5 place-items-center rounded-full bg-[#febc2e]/85 text-black/60 transition-colors after:absolute after:-inset-1 after:rounded-full after:content-[''] hover:bg-[#febc2e]"
+                        className="relative grid h-[12px] w-[12px] place-items-center rounded-full bg-[#febc2e] after:absolute after:-inset-[5px] after:rounded-full after:content-['']"
                       >
-                        <Minus className="h-2.5 w-2.5" />
+                        <Minus
+                          className="h-[8px] w-[8px] text-black/55 opacity-0 transition-opacity group-hover/lights:opacity-100"
+                          strokeWidth={3}
+                        />
                       </button>
                       {compact ? null : (
                         <button
@@ -803,18 +825,28 @@ export default function MiniOS() {
                           onClick={() => zoomWindow(entry.id)}
                           aria-label={entry.zoomed ? t('os.window.restore') : t('os.window.zoom')}
                           title={entry.zoomed ? t('os.window.restore') : t('os.window.zoom')}
-                          className="relative grid h-3.5 w-3.5 place-items-center rounded-full bg-[#28c840]/85 text-black/60 transition-colors after:absolute after:-inset-1 after:rounded-full after:content-[''] hover:bg-[#28c840]"
+                          className="relative grid h-[12px] w-[12px] place-items-center rounded-full bg-[#28c840] after:absolute after:-inset-[5px] after:rounded-full after:content-['']"
                         >
                           {entry.zoomed ? (
-                            <Minimize2 className="h-2.5 w-2.5" />
+                            <Minimize2
+                              className="h-[8px] w-[8px] text-black/55 opacity-0 transition-opacity group-hover/lights:opacity-100"
+                              strokeWidth={3}
+                            />
                           ) : (
-                            <Maximize2 className="h-2 w-2" />
+                            <Maximize2
+                              className="h-[7px] w-[7px] text-black/55 opacity-0 transition-opacity group-hover/lights:opacity-100"
+                              strokeWidth={3}
+                            />
                           )}
                         </button>
                       )}
                     </span>
 
-                    <span className="truncate font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/65">
+                    <span
+                      className={`pointer-events-none absolute inset-x-[84px] truncate text-center text-[12.5px] font-medium ${
+                        isFront ? 'text-white/85' : 'text-white/55'
+                      }`}
+                    >
                       {label}
                     </span>
                   </div>
@@ -846,7 +878,7 @@ export default function MiniOS() {
                       onLostPointerCapture={() => {
                         resizeRef.current = null
                       }}
-                      className="absolute bottom-0 right-0 grid h-4 w-4 cursor-nwse-resize touch-none place-items-center text-white/25 transition-colors hover:text-white/60"
+                      className="absolute bottom-0 right-0 grid h-4 w-4 cursor-nwse-resize touch-none place-items-center text-white/20 transition-colors hover:text-white/55"
                     >
                       <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" fill="none" stroke="currentColor">
                         <path d="M9 3 3 9M9 6.5 6.5 9" strokeWidth="1" />
@@ -859,47 +891,90 @@ export default function MiniOS() {
           </div>
 
           {/* ---- dock ---- */}
-          <div
-            aria-label={t('os.dock')}
-            role="toolbar"
-            className="absolute inset-x-0 bottom-0 z-[2] flex h-[76px] items-center justify-center gap-0.5 border-t border-white/10 bg-black/35 px-2 backdrop-blur-sm sm:gap-1.5 sm:px-3"
-          >
-            {APP_IDS.map((app) => {
-              const meta = APPS.find((entry) => entry.id === app)!
-              const Icon = meta.icon
-              const entry = windows.find((item) => item.app === app)
-              const isRunning = Boolean(entry)
-              const isFront = isRunning && !entry!.minimised && entry!.id === frontId
-              return (
-                <button
-                  key={app}
-                  type="button"
-                  onClick={() => pressDock(app)}
-                  title={t(meta.labelKey)}
-                  aria-label={t(meta.labelKey)}
-                  aria-pressed={isFront}
-                  className="group flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[4px] px-1 py-2 transition-colors hover:bg-white/10 sm:w-[74px] sm:flex-none"
-                >
-                  <Icon
-                    className={`h-6 w-6 shrink-0 transition-colors ${
-                      isRunning ? 'text-[color:var(--os-accent)]' : 'text-white/70 group-hover:text-white/95'
-                    }`}
+          <div className="absolute inset-x-0 bottom-2 z-[2] flex justify-center px-3">
+            <div
+              aria-label={t('os.dock')}
+              role="toolbar"
+              className="flex items-end gap-1.5 rounded-[20px] border border-white/20 bg-white/[0.13] p-2 shadow-[0_24px_60px_-14px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-2xl"
+            >
+              {DOCK_MAIN.map((app) => {
+                const meta = APPS.find((entry) => entry.id === app)!
+                const entry = windows.find((item) => item.app === app)
+                const isRunning = Boolean(entry)
+                const isFront = isRunning && !entry!.minimised && entry!.id === frontId
+                return (
+                  <DockItem
+                    key={app}
+                    app={app}
+                    label={t(meta.labelKey)}
+                    running={isRunning}
+                    front={isFront}
+                    onPress={() => pressDock(app)}
                   />
-                  <span className="hidden max-w-full truncate font-mono text-[9px] text-white/70 sm:block">
-                    {t(meta.labelKey)}
-                  </span>
-                  <span
-                    aria-hidden
-                    className={`h-1 w-1 shrink-0 rounded-full transition-colors ${
-                      isRunning ? 'bg-white/70' : 'bg-transparent'
-                    }`}
+                )
+              })}
+
+              <span aria-hidden className="mx-1 h-9 w-px self-center bg-white/20" />
+
+              {APP_IDS.filter((app) => app === 'trash').map((app) => {
+                const meta = APPS.find((entry) => entry.id === app)!
+                const entry = windows.find((item) => item.app === app)
+                const isRunning = Boolean(entry)
+                const isFront = isRunning && !entry!.minimised && entry!.id === frontId
+                return (
+                  <DockItem
+                    key={app}
+                    app={app}
+                    label={t(meta.labelKey)}
+                    running={isRunning}
+                    front={isFront}
+                    onPress={() => pressDock(app)}
                   />
-                </button>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </>
       )}
     </div>
+  )
+}
+
+/** One icon in the Dock: magnify on hover, label above, running dot below. */
+function DockItem({
+  app,
+  label,
+  running,
+  front,
+  onPress,
+}: {
+  app: OsAppId
+  label: string
+  running: boolean
+  front: boolean
+  onPress: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      aria-label={label}
+      aria-pressed={front}
+      title={label}
+      className="group relative flex w-[48px] shrink-0 flex-col items-center justify-end rounded-[10px] outline-offset-4"
+    >
+      <span aria-hidden className="pointer-events-none absolute -top-8 whitespace-nowrap rounded-[5px] border border-white/15 bg-[#1b1b1e]/90 px-2 py-1 text-[10.5px] text-white/90 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
+        {label}
+      </span>
+      <span className="transition-transform duration-150 ease-out group-hover:-translate-y-1 group-hover:scale-110 group-active:scale-100">
+        <AppIcon app={app} size={44} />
+      </span>
+      <span
+        aria-hidden
+        className={`mt-1.5 h-1 w-1 rounded-full transition-colors ${
+          running ? 'bg-white/85' : 'bg-transparent'
+        }`}
+      />
+    </button>
   )
 }

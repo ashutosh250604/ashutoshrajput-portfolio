@@ -5,6 +5,7 @@ import SectionHeader from './SectionHeader'
 import SocialLinks from './SocialLinks'
 import { emailAddress } from '@/data/socials'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useLocalTime } from '@/lib/localTime'
 
 async function copyText(value: string): Promise<boolean> {
   try {
@@ -31,6 +32,7 @@ async function copyText(value: string): Promise<boolean> {
 
 export default function ContactSection() {
   const { t } = useLanguage()
+  const time = useLocalTime()
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -56,7 +58,6 @@ export default function ContactSection() {
               <span className="text-accent">{t('contact.title.highlight')}</span>
             </>
           }
-          subtitle={t('contact.subtitle')}
         />
 
         <div className="mt-10 grid gap-10 sm:mt-12 md:grid-cols-12 md:gap-12">
@@ -65,7 +66,7 @@ export default function ContactSection() {
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">{t('contact.email')}</p>
               <a
                 href={`mailto:${emailAddress}`}
-                className="mt-2 inline-block break-all font-mono text-base underline-offset-4 hover:text-accent hover:underline hover:text-accent sm:text-xl"
+                className="mt-2 inline-block break-all font-mono text-base underline-offset-4 hover:text-accent hover:underline sm:text-xl"
               >
                 {emailAddress}
               </a>
@@ -108,13 +109,17 @@ export default function ContactSection() {
           </div>
 
           <div className="space-y-5 md:col-span-5 md:pl-6">
-            <h3 className="text-lg font-semibold tracking-tight sm:text-xl">{t('contact.cta')}</h3>
-            <p className="text-sm leading-relaxed text-muted sm:text-base">{t('contact.ctaDescription')}</p>
-
-            <div className="space-y-3 border-t border-rule/15 pt-5">
+            <div className="space-y-3">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">{t('contact.social')}</p>
               <SocialLinks />
             </div>
+
+            <dl className="border-t border-rule/15 pt-5 font-mono text-xs">
+              <div className="flex items-baseline justify-between gap-6">
+                <dt className="uppercase tracking-[0.18em] text-muted">{t('contact.localTime')}</dt>
+                <dd className="tabular text-right">{time ?? '--:--'}</dd>
+              </div>
+            </dl>
           </div>
         </div>
       </div>

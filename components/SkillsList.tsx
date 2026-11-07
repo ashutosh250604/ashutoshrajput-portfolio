@@ -20,7 +20,6 @@ export default function SkillsList() {
       <div className="mx-auto max-w-6xl border-x border-rule/15 px-5 py-16 sm:px-8 sm:py-24">
         <SectionHeader
           index="04"
-          subtitle={t('skills.subtitle')}
           title={
             <>
               {t('skills.title')}{' '}

@@ -56,15 +56,11 @@ export default function ExperienceList() {
                       href={job.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-xs text-accent underline-offset-4 hover:underline text-accent"
+                      className="font-mono text-xs text-accent underline-offset-4 hover:underline"
                     >
                       {read('company', job.company)}
                     </a>
                   </div>
-
-                  <p className="max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-                    {read('description', job.description)}
-                  </p>
 
                   {achievements.length > 0 ? (
                     <ol className="space-y-3">

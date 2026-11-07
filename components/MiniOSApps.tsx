@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type * as React from 'react'
-import { ArrowUpRight, Download, Mail } from 'lucide-react'
+import { ArrowUpRight, Download, Folder, Mail } from 'lucide-react'
 import projects, { profileUrl } from '@/data/projects'
 import skills from '@/data/skills'
 import { emailAddress } from '@/data/socials'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useLocalTime } from '@/lib/localTime'
 import type { OsAppId } from '@/lib/os'
+import { AppIcon } from './MiniOSIcons'
 
 /**
  * What is inside the desktop's windows.
@@ -19,14 +20,17 @@ import type { OsAppId } from '@/lib/os'
  * also why the terminal is worth having: it is the site's own data, queryable.
  */
 
-/** One definition list, used by About so its rows line up with the site's. */
+/** The spec sheet, set the way a Mac writes one: label left, value right. */
 function Rows({ rows }: { rows: { label: string; value: string }[] }) {
   return (
-    <dl className="divide-y divide-white/10">
+    <dl className="overflow-hidden rounded-[7px] border border-white/[0.08] bg-white/[0.03]">
       {rows.map((row) => (
-        <div key={row.label} className="flex items-baseline justify-between gap-6 py-2">
-          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">{row.label}</dt>
-          <dd className="text-right text-[13px] text-white/90">{row.value}</dd>
+        <div
+          key={row.label}
+          className="flex items-baseline justify-between gap-5 border-b border-white/[0.07] px-3 py-2 last:border-b-0"
+        >
+          <dt className="shrink-0 text-[11px] text-white/50">{row.label}</dt>
+          <dd className="min-w-0 truncate text-right text-[11.5px] text-white/90">{row.value}</dd>
         </div>
       ))}
     </dl>
@@ -48,37 +52,38 @@ export function AboutApp() {
   ]
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-baseline gap-3">
-        <span
-          aria-hidden
-          className="grid h-9 w-9 place-items-center rounded-[3px] border border-white/25 font-mono text-[11px] tracking-[0.06em] text-white/85"
-        >
-          AR
-        </span>
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-2.5 text-center">
+        <img
+          src="/avatar.webp"
+          alt=""
+          width={64}
+          height={64}
+          className="h-16 w-16 rounded-full object-cover shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_8px_20px_-8px_rgba(0,0,0,0.8)]"
+        />
         <div>
-          <p className="text-[15px] font-semibold tracking-tight text-white/95">{t('hero.name')}</p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
-            {t('hero.role.backend')}
-          </p>
+          <p className="text-[17px] font-semibold tracking-tight text-white/95">{t('hero.name')}</p>
+          <p className="mt-0.5 text-[11.5px] text-white/55">{t('hero.role.backend')}</p>
         </div>
       </div>
 
-      <Rows rows={rows} />
+      <div className="w-full">
+        <Rows rows={rows} />
+      </div>
 
-      <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[11px]">
+      <div className="flex w-full flex-col items-center gap-1.5 border-t border-white/[0.08] pt-3 text-[11.5px]">
         <a
           href={profileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-white/80 hover:text-[color:var(--os-accent)]"
+          className="inline-flex items-center gap-1.5 text-white/75 transition-colors hover:text-[color:var(--os-accent)]"
         >
           github.com/ashutosh250604
           <ArrowUpRight className="h-3 w-3" />
         </a>
         <a
           href={`mailto:${emailAddress}`}
-          className="inline-flex items-center gap-1.5 text-white/80 hover:text-[color:var(--os-accent)]"
+          className="inline-flex items-center gap-1.5 text-white/75 transition-colors hover:text-[color:var(--os-accent)]"
         >
           {emailAddress}
           <Mail className="h-3 w-3" />
@@ -92,32 +97,47 @@ export function ProjectsApp() {
   const { t } = useLanguage()
 
   return (
-    <ul className="divide-y divide-white/10">
+    <ul className="-mx-1 divide-y divide-white/[0.07]">
       {projects.map((project) => {
         const href = project.live ?? project.github
-        return (
-          <li key={project.id} className="py-3">
-            <div className="flex items-baseline justify-between gap-4">
-              <p className="text-[13px] text-white/90">{t(`project.${project.id}.title`)}</p>
-              <span className="tabular shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
-                {project.year} · {t(`projects.status.${project.status}`)}
+        const title = t(`project.${project.id}.title`)
+        const body = (
+          <>
+            <span
+              aria-hidden
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-[6px] bg-[#0a84ff]/15 text-[color:var(--os-accent)]"
+            >
+              <Folder className="h-4 w-4" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[12.5px] font-medium text-white/90">{title}</span>
+              <span className="mt-0.5 block truncate text-[11px] text-white/45">
+                {project.tech.join(' · ')}
               </span>
-            </div>
-            <p className="mt-1 font-mono text-[10px] leading-relaxed text-white/55">
-              {project.tech.join(' · ')}
-            </p>
+            </span>
+            <span className="tabular shrink-0 text-[10.5px] text-white/40">{project.year}</span>
+            {href ? (
+              <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-white/30 transition-colors group-hover:text-[color:var(--os-accent)]" />
+            ) : null}
+          </>
+        )
+
+        return (
+          <li key={project.id}>
             {href ? (
               <a
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1 inline-flex items-center gap-1 font-mono text-[10px] text-white/70 hover:text-[color:var(--os-accent)]"
+                className="group flex items-center gap-3 rounded-[6px] px-2 py-2.5 transition-colors hover:bg-white/[0.06]"
               >
-                {project.live ? t('projects.viewLive') : t('projects.viewCode')}
-                <ArrowUpRight className="h-3 w-3" />
+                {body}
               </a>
             ) : (
-              <p className="mt-1 font-mono text-[10px] text-white/55">{t('projects.status.private')}</p>
+              <div className="flex items-center gap-3 px-2 py-2.5">
+                {body}
+                <span className="shrink-0 text-[10.5px] text-white/35">{t('projects.status.private')}</span>
+              </div>
             )}
           </li>
         )
@@ -130,27 +150,46 @@ export function ResumeApp() {
   const { t } = useLanguage()
 
   return (
-    <div className="flex h-full flex-col items-start gap-4">
-      <div className="flex items-center gap-3">
-        <span className="grid h-11 w-9 place-items-center rounded-[3px] border border-white/25 font-mono text-[9px] uppercase text-white/70">
-          PDF
-        </span>
-        <div>
-          <p className="text-[13px] text-white/90">resume.pdf</p>
-          <p className="font-mono text-[10px] text-white/55">A4 · 1 page · PDF</p>
+    <div className="flex h-full gap-4">
+      {/* a Quick Look-sized page, enough to recognise the sheet before opening it */}
+      <div
+        aria-hidden
+        className="relative w-[40%] max-w-[152px] shrink-0 overflow-hidden rounded-[2px] bg-[#fbfbfd] shadow-[0_12px_26px_-10px_rgba(0,0,0,0.8)] ring-1 ring-black/25"
+      >
+        <div className="h-[5px] bg-[#e5484d]" />
+        <div className="p-3">
+          <p className="text-[9px] font-semibold leading-tight tracking-tight text-[#1c1c1e]">{t('hero.name')}</p>
+          <p className="mt-0.5 text-[6.5px] text-[#6b6b70]">{t('hero.role.backend')}</p>
+          <div className="mt-3 space-y-[5px]">
+            {[92, 78, 85, 70, 88, 62, 80, 74, 86, 58].map((width, index) => (
+              <span
+                key={index}
+                className="block h-[2px] rounded-full bg-[#d8d8dd]"
+                style={{ width: `${width}%` }}
+              />
+            ))}
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 border-t border-[#e5e5ea] pt-2 text-[5.5px] text-[#8a8a90]">
+            <span className="rounded-[2px] bg-[#e5484d] px-1 py-[1px] font-bold text-white">PDF</span>
+            A4 · 1 page
+          </div>
         </div>
       </div>
 
-      <p className="max-w-sm text-[12px] leading-relaxed text-white/60">{t('project.portfolio.description')}</p>
-
-      <a
-        href="/resume.pdf"
-        download
-        className="inline-flex items-center gap-2 rounded-sm bg-white/90 px-3 py-2 font-mono text-[11px] font-medium text-black transition-colors hover:bg-white"
-      >
-        <Download className="h-3.5 w-3.5" />
-        {t('mobileNav.downloadResume')}
-      </a>
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-[13px] font-medium text-white/90">resume.pdf</p>
+        </div>
+        <p className="text-[11.5px] leading-relaxed text-white/55">{t('project.portfolio.description')}</p>
+        <a
+          href="/resume.pdf"
+          download
+          className="mt-auto inline-flex items-center gap-2 rounded-[6px] bg-white/90 px-3 py-1.5 text-[11.5px] font-medium text-black transition-colors hover:bg-white"
+        >
+          <Download className="h-3.5 w-3.5" />
+          {t('mobileNav.downloadResume')}
+        </a>
+      </div>
     </div>
   )
 }
@@ -160,10 +199,8 @@ export function TrashApp() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-      <p aria-hidden className="tabular font-mono text-3xl text-white/30">
-        0
-      </p>
-      <p className="max-w-xs text-[12px] leading-relaxed text-white/55">{t('os.trashEmpty')}</p>
+      <AppIcon app="trash" size={68} />
+      <p className="max-w-xs text-[11.5px] leading-relaxed text-white/55">{t('os.trashEmpty')}</p>
     </div>
   )
 }
@@ -350,7 +387,10 @@ export function TerminalApp({
         <p className="text-white/55">Type `help` and press return.</p>
         <p>&nbsp;</p>
         {lines.map((line, index) => (
-          <p key={`${index}-${line}`} className={line.startsWith('visit@') ? 'text-[color:var(--os-accent)]' : undefined}>
+          <p
+            key={`${index}-${line}`}
+            className={`whitespace-pre-wrap break-words ${line.startsWith('visit@') ? 'text-[color:var(--os-accent)]' : ''}`}
+          >
             {line || '\u00a0'}
           </p>
         ))}

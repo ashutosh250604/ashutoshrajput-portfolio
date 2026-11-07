@@ -21,7 +21,6 @@ export default function ProjectsList() {
               <span className="text-accent">{t('projects.title.highlight')}</span>
             </>
           }
-          subtitle={t('projects.subtitle')}
         />
 
         <div className="mt-10 sm:mt-12">
@@ -35,7 +34,7 @@ export default function ProjectsList() {
               href={profileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-1.5 font-mono text-xs underline-offset-4 hover:text-accent hover:underline hover:text-accent"
+              className="group inline-flex items-center gap-1.5 font-mono text-xs underline-offset-4 hover:text-accent hover:underline"
             >
               {t('projects.moreCta')}
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
