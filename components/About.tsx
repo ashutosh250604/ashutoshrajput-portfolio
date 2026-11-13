@@ -1,6 +1,7 @@
 'use client'
 
 import SectionHeader from './SectionHeader'
+import LurkingEyes from './LurkingEyes'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function About() {
@@ -26,6 +27,7 @@ export default function About() {
       <div className="mx-auto max-w-6xl border-x border-rule/15 px-5 py-16 sm:px-8 sm:py-24">
         <SectionHeader
           index="01"
+          ornament={<LurkingEyes />}
           title={
             <>
               {t('about.title')}{' '}

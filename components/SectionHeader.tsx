@@ -7,18 +7,21 @@ export interface SectionHeaderProps {
   subtitle?: string
   /** Right-aligned monospace metadata, e.g. "04 projects · 2025 - 2026". */
   note?: string
+  /** Optional small decoration at the end of the rule, such as the eyes in About. */
+  ornament?: ReactNode
 }
 
 /**
  * The one repeated furniture of the site: an index number, a rule running to
  * the right margin, an optional metadata note, then the heading.
  */
-export default function SectionHeader({ index, title, subtitle, note }: SectionHeaderProps) {
+export default function SectionHeader({ index, title, subtitle, note, ornament }: SectionHeaderProps) {
   return (
     <header className="space-y-4">
       <div className="flex items-center gap-3 sm:gap-4">
         <span className="tabular font-mono text-xs text-accent">{index}</span>
         <span aria-hidden className="h-px flex-1 bg-rule/20" />
+        {ornament ? <span className="shrink-0">{ornament}</span> : null}
         {note ? (
           <span className="tabular font-mono text-[10px] uppercase tracking-[0.18em] text-muted sm:text-[11px]">
             {note}
