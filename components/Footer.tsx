@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
+import LurkingEyes from './LurkingEyes'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { profileUrl } from '@/data/projects'
 import { revision } from '@/data/colophon'
@@ -173,7 +174,10 @@ export default function Footer() {
         ) : null}
 
         <div className="mt-10 flex flex-col gap-3 border-t border-rule/15 pt-6 font-mono text-[11px] text-muted sm:flex-row sm:items-center sm:justify-between">
-          <span className="tabular">© {currentYear} - {t('footer.builtBy')}</span>
+          <span className="flex items-center gap-3">
+            <LurkingEyes size="sm" tone="grey" />
+            <span className="tabular">© {currentYear} - {t('footer.builtBy')}</span>
+          </span>
           <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {/* The one visible way into the key sheet. Quiet, but a visitor who
                 reads the bottom of a page can find it without being told. */}

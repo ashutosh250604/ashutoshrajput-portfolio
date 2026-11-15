@@ -3,6 +3,7 @@
 import { ArrowUpRight } from 'lucide-react'
 import SectionHeader from './SectionHeader'
 import ProjectEntry from './ProjectEntry'
+import LurkingEyes from './LurkingEyes'
 import projects, { profileUrl } from '@/data/projects'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -15,6 +16,7 @@ export default function ProjectsList() {
         <SectionHeader
           index="02"
           note={t('projects.note')}
+          ornament={<LurkingEyes size="sm" tone="green" flip />}
           title={
             <>
               {t('projects.title')}{' '}

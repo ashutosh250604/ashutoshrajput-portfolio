@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import SectionHeader from './SectionHeader'
+import LurkingEyes from './LurkingEyes'
 import SocialLinks from './SocialLinks'
 import { emailAddress } from '@/data/socials'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -52,6 +53,7 @@ export default function ContactSection() {
         <SectionHeader
           index="05"
           note={t('contact.connect')}
+          ornament={<LurkingEyes size="sm" tone="hazel" flip />}
           title={
             <>
               {t('contact.title')}{' '}

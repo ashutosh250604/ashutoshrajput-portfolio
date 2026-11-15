@@ -1,27 +1,81 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
-/** The furthest a pupil can travel from the centre of its eye. */
-const MAX_LOOK = 5
+type EyeSize = 'sm' | 'md'
+
+export type EyeTone = 'blue' | 'violet' | 'green' | 'brown' | 'hazel' | 'grey'
+
+const tones: Record<EyeTone, { light: string; base: string; dark: string }> = {
+  blue: { light: '#a6dcf2', base: '#4b8fb8', dark: '#205d80' },
+  violet: { light: '#d8bdf2', base: '#8d67b7', dark: '#523a72' },
+  green: { light: '#addcba', base: '#5b9774', dark: '#2d6046' },
+  brown: { light: '#ddb383', base: '#9a6a42', dark: '#5b3820' },
+  hazel: { light: '#dfd087', base: '#a3843d', dark: '#5d491d' },
+  grey: { light: '#d5e0e6', base: '#8196a3', dark: '#485b67' },
+}
+
+const sizes = {
+  sm: {
+    eyes: [
+      { width: 34, height: 23 },
+      { width: 31, height: 21 },
+    ],
+    gap: 'gap-[5px]',
+    lookX: 4.6,
+    lookY: 2.2,
+  },
+  md: {
+    eyes: [
+      { width: 40, height: 27 },
+      { width: 36, height: 25 },
+    ],
+    gap: 'gap-[6px]',
+    lookX: 5.5,
+    lookY: 2.6,
+  },
+}
+
+const EYE_PATH =
+  'M3 17 C8 9 17 5.5 26 6.3 C34 7 39.5 11.3 42 17 C36 23.7 25.5 25.8 16 24.4 C8.5 23.2 4.6 20.7 3 17 Z'
+
+interface LurkingEyesProps {
+  size?: EyeSize
+  /** Iris colour, so pairs down the page do not all read the same. */
+  tone?: EyeTone
+  /** Mirror the pair, so repeated eyes do not all lean the same way. */
+  flip?: boolean
+}
 
 /**
- * Two small eyes for the page furniture.
+ * A pair of eyes that follows the pointer.
  *
  * They are decoration, not a control: no copy, no tab stop, no announcement.
- * A single pointer listener feeds a small rAF loop so the pupils ease toward
- * the cursor instead of jumping there, and a random blink keeps them from
- * feeling like a pair of pinned dots. Visitors who ask for reduced motion get
- * no blinking and no easing, but the pupils still answer the pointer directly:
- * that movement is driven by the visitor rather than played at them.
+ * The almond shape, lash line and small wing keep them closer to a drawn face
+ * than to two circles. A single pointer listener feeds a small rAF loop so the
+ * irises ease toward the cursor instead of jumping there, and a random blink
+ * keeps them from feeling like pinned dots. Visitors who ask for reduced
+ * motion get no blinking and no easing, but the irises still answer the
+ * pointer directly: that movement is driven by the visitor rather than played
+ * at them.
  */
-export default function LurkingEyes() {
+export default function LurkingEyes({ size = 'md', tone = 'blue', flip = false }: LurkingEyesProps) {
   const rootRef = useRef<HTMLSpanElement>(null)
   const frameRef = useRef<number | null>(null)
   const targetRef = useRef({ x: 0, y: 0 })
   const currentRef = useRef({ x: 0, y: 0 })
   const [blinking, setBlinking] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
+
+  const rawId = useId().replace(/:/g, '')
+  const clipId = `eye-clip-${rawId}`
+  const irisId = `eye-iris-${rawId}`
+  const palette = tones[tone]
+
+  const geometry = sizes[size]
+  const eyeShapes = flip
+    ? [geometry.eyes[1], geometry.eyes[0]]
+    : geometry.eyes
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -73,8 +127,10 @@ export default function LurkingEyes() {
         targetRef.current = { x: 0, y: 0 }
       } else {
         const reach = Math.min(distance / 140, 1)
-        const look = MAX_LOOK * reach
-        targetRef.current = { x: (dx / distance) * look, y: (dy / distance) * look }
+        targetRef.current = {
+          x: (dx / distance) * geometry.lookX * reach,
+          y: (dy / distance) * geometry.lookY * reach,
+        }
       }
 
       if (reducedMotion) {
@@ -110,7 +166,7 @@ export default function LurkingEyes() {
         frameRef.current = null
       }
     }
-  }, [reducedMotion])
+  }, [geometry.lookX, geometry.lookY, reducedMotion])
 
   useEffect(() => {
     if (reducedMotion) {
@@ -131,7 +187,7 @@ export default function LurkingEyes() {
           if (!active) return
           setBlinking(false)
           schedule()
-        }, 110)
+        }, 120)
       }, 4200 + Math.random() * 4200)
     }
 
@@ -148,22 +204,94 @@ export default function LurkingEyes() {
     <span
       ref={rootRef}
       data-lurking-eyes
+      data-eye-size={size}
+      data-eye-tone={tone}
       aria-hidden="true"
-      className="inline-flex items-center gap-[5px]"
+      className={`inline-flex items-center ${geometry.gap}`}
     >
-      {[0, 1].map((eye) => (
+      <svg width="0" height="0" aria-hidden="true" className="absolute h-0 w-0">
+        <defs>
+          <radialGradient id={irisId} cx="34%" cy="28%" r="78%">
+            <stop offset="0%" stopColor={palette.light} />
+            <stop offset="58%" stopColor={palette.base} />
+            <stop offset="100%" stopColor={palette.dark} />
+          </radialGradient>
+          <clipPath id={clipId}>
+            <path d={EYE_PATH} />
+          </clipPath>
+        </defs>
+      </svg>
+
+      {eyeShapes.map((shape, eye) => (
         <span
-          key={eye}
-          className={`relative grid place-items-center rounded-[50%] border border-rule/40 bg-paper transition-transform duration-100 ease-out ${
-            eye === 0 ? 'h-[18px] w-[24px]' : 'h-[16px] w-[22px]'
-          } ${blinking ? 'scale-y-[0.08]' : 'scale-y-100'}`}
+          key={`${size}-${flip ? 'flipped' : 'forward'}-${eye}`}
+          className={`block shrink-0 drop-shadow-[0_1px_1px_rgba(0,0,0,0.28)] transition-transform duration-100 ease-out ${
+            blinking ? 'scale-y-[0.08]' : 'scale-y-100'
+          }`}
+          style={{ width: shape.width, height: shape.height }}
         >
-          <span
-            className="relative h-2 w-2 rounded-full bg-ink ring-1 ring-paper"
-            style={{ transform: 'translate3d(var(--eye-x, 0px), var(--eye-y, 0px), 0)' }}
-          >
-            <span className="absolute left-px top-px h-0.5 w-0.5 rounded-full bg-paper" />
-          </span>
+          <svg viewBox="0 0 44 30" className="h-full w-full" aria-hidden="true" focusable="false">
+            <g transform={eye === 0 ? 'translate(44 0) scale(-1 1)' : undefined}>
+              <path d={EYE_PATH} fill="#f8f4ea" stroke="#2f2822" strokeWidth="1.15" strokeLinejoin="round" />
+
+              <g clipPath={`url(#${clipId})`}>
+                <g
+                  style={{
+                    transform: 'translate3d(var(--eye-x, 0px), var(--eye-y, 0px), 0)',
+                  }}
+                >
+                  <circle
+                    cx="23"
+                    cy="15.8"
+                    r="8.2"
+                    fill={`url(#${irisId})`}
+                    stroke={palette.dark}
+                    strokeWidth="0.7"
+                  />
+                  <circle cx="23" cy="15.8" r="3.9" fill="#0b0908" />
+                  <circle cx="20.2" cy="12.2" r="1.9" fill="#fffdf8" opacity="0.92" />
+                  <circle cx="26.8" cy="18.6" r="1" fill="#fffdf8" opacity="0.55" />
+                </g>
+
+                <path
+                  d="M3.4 16.5 C10 8.6 20.4 5.6 29.5 6.8 C35 7.5 39.2 11 41.6 15.7 C35.5 10.8 28 8.8 20.2 9.3 C12.8 9.8 7 12.2 3.4 16.5 Z"
+                  fill="#3a2b21"
+                  opacity="0.14"
+                />
+              </g>
+
+              <path
+                d="M3 16.8 C10 7.6 21 4.6 30.5 6.2 C35.5 7 39.5 11 42 16.2"
+                fill="none"
+                stroke="#241c17"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M40.2 13.8 C41.8 11.6 43 9.9 43.6 8.2"
+                fill="none"
+                stroke="#241c17"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+              <path
+                d="M5.2 19.5 C11.5 24.6 23 26.1 33 22.9"
+                fill="none"
+                stroke="#3a3028"
+                strokeWidth="0.8"
+                strokeLinecap="round"
+                opacity="0.45"
+              />
+
+              <path
+                d="M31.6 6.8 L30.4 4.1 M36 7.8 L35.6 5.1 M40 10.2 L40.6 7.7"
+                fill="none"
+                stroke="#241c17"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+            </g>
+          </svg>
         </span>
       ))}
     </span>
