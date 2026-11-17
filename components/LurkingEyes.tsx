@@ -18,8 +18,8 @@ const tones: Record<EyeTone, { light: string; base: string; dark: string }> = {
 const sizes = {
   sm: {
     eyes: [
-      { width: 34, height: 26 },
-      { width: 31, height: 24 },
+      { width: 34, height: 24 },
+      { width: 31, height: 22 },
     ],
     gap: 'gap-[5px]',
     lookX: 4.6,
@@ -27,8 +27,8 @@ const sizes = {
   },
   md: {
     eyes: [
-      { width: 40, height: 31 },
-      { width: 36, height: 28 },
+      { width: 40, height: 28 },
+      { width: 36, height: 25 },
     ],
     gap: 'gap-[6px]',
     lookX: 5.5,
@@ -39,8 +39,10 @@ const sizes = {
 const EYE_PATH =
   'M3 17 C8 9 17 5.5 26 6.3 C34 7 39.5 11.3 42 17 C36 23.7 25.5 25.8 16 24.4 C8.5 23.2 4.6 20.7 3 17 Z'
 
-const BROW_PATH =
-  'M6.2 0.4 C13.4 -2.9 22 -4 29.2 -3.2 C34.8 -2.6 39.2 -0.9 42 1.1 C38.2 0.3 34.3 -0.1 29.5 0 C21.5 0.2 13.4 0.6 7.4 1.5 C6.9 1.2 6.5 0.8 6.2 0.4 Z'
+const UPPER_LASHES =
+  'M27 5.8 C26.1 4.1 25.7 2.8 25.9 1.4 M31.5 6.7 C30.8 4.8 30.5 3.4 30.7 1.9 M35.7 8.2 C35.3 6.2 35.4 4.6 36 3.1 M39.1 10.3 C39.2 8.1 39.7 6.5 40.7 5 M41.6 13.4 C42.1 11.1 42.7 9.5 43.4 7.8'
+
+const LOWER_LASHES = 'M24.5 25.4 L25.1 27 M28 25.3 L28.5 26.9 M31.5 24.6 L32.1 26.1'
 
 interface LurkingEyesProps {
   size?: EyeSize
@@ -54,10 +56,10 @@ interface LurkingEyesProps {
  * A pair of eyes that follows the pointer.
  *
  * They are decoration, not a control: no copy, no tab stop, no announcement.
- * The almond shape, lash line, small wing and arched brow keep them closer to
- * a drawn face than to two circles. A single pointer listener feeds a small
- * rAF loop so the irises ease toward the cursor instead of jumping there, and
- * a random blink
+ * The almond shape, long lashes and small wing keep them closer to a drawn
+ * face than to two circles. A single pointer listener feeds a small rAF loop
+ * so the irises ease toward the cursor instead of jumping there, and a random
+ * blink
  * keeps them from feeling like pinned dots. Visitors who ask for reduced
  * motion get no blinking and no easing, but the irises still answer the
  * pointer directly: that movement is driven by the visitor rather than played
@@ -237,9 +239,8 @@ export default function LurkingEyes({ size = 'md', tone = 'blue', flip = false }
           }`}
           style={{ width: shape.width, height: shape.height }}
         >
-          <svg viewBox="0 -4 44 34" className="h-full w-full" aria-hidden="true" focusable="false">
+          <svg viewBox="0 0 44 31" className="h-full w-full" aria-hidden="true" focusable="false">
             <g transform={eye === 0 ? 'translate(44 0) scale(-1 1)' : undefined}>
-              <path d={BROW_PATH} fill="#9b765f" opacity="0.9" />
               <path d={EYE_PATH} fill="#f8f4ea" stroke="#2f2822" strokeWidth="1.15" strokeLinejoin="round" />
 
               <g clipPath={`url(#${clipId})`}>
@@ -276,10 +277,10 @@ export default function LurkingEyes({ size = 'md', tone = 'blue', flip = false }
                 strokeLinecap="round"
               />
               <path
-                d="M40.2 13.8 C41.8 11.6 43 9.9 43.6 8.2"
+                d="M39.8 14 C41.5 12 42.8 10.2 43.4 8.3"
                 fill="none"
                 stroke="#241c17"
-                strokeWidth="1.6"
+                strokeWidth="1.7"
                 strokeLinecap="round"
               />
               <path
@@ -292,11 +293,19 @@ export default function LurkingEyes({ size = 'md', tone = 'blue', flip = false }
               />
 
               <path
-                d="M31.6 6.8 L30.4 4.1 M36 7.8 L35.6 5.1 M40 10.2 L40.6 7.7"
+                d={UPPER_LASHES}
                 fill="none"
-                stroke="#241c17"
-                strokeWidth="1"
+                stroke="#7f5a43"
+                strokeWidth="1.1"
                 strokeLinecap="round"
+              />
+              <path
+                d={LOWER_LASHES}
+                fill="none"
+                stroke="#7f5a43"
+                strokeWidth="0.8"
+                strokeLinecap="round"
+                opacity="0.6"
               />
             </g>
           </svg>
