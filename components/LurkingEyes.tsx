@@ -18,8 +18,8 @@ const tones: Record<EyeTone, { light: string; base: string; dark: string }> = {
 const sizes = {
   sm: {
     eyes: [
-      { width: 34, height: 23 },
-      { width: 31, height: 21 },
+      { width: 34, height: 26 },
+      { width: 31, height: 24 },
     ],
     gap: 'gap-[5px]',
     lookX: 4.6,
@@ -27,8 +27,8 @@ const sizes = {
   },
   md: {
     eyes: [
-      { width: 40, height: 27 },
-      { width: 36, height: 25 },
+      { width: 40, height: 31 },
+      { width: 36, height: 28 },
     ],
     gap: 'gap-[6px]',
     lookX: 5.5,
@@ -38,6 +38,9 @@ const sizes = {
 
 const EYE_PATH =
   'M3 17 C8 9 17 5.5 26 6.3 C34 7 39.5 11.3 42 17 C36 23.7 25.5 25.8 16 24.4 C8.5 23.2 4.6 20.7 3 17 Z'
+
+const BROW_PATH =
+  'M6.2 0.4 C13.4 -2.9 22 -4 29.2 -3.2 C34.8 -2.6 39.2 -0.9 42 1.1 C38.2 0.3 34.3 -0.1 29.5 0 C21.5 0.2 13.4 0.6 7.4 1.5 C6.9 1.2 6.5 0.8 6.2 0.4 Z'
 
 interface LurkingEyesProps {
   size?: EyeSize
@@ -51,9 +54,10 @@ interface LurkingEyesProps {
  * A pair of eyes that follows the pointer.
  *
  * They are decoration, not a control: no copy, no tab stop, no announcement.
- * The almond shape, lash line and small wing keep them closer to a drawn face
- * than to two circles. A single pointer listener feeds a small rAF loop so the
- * irises ease toward the cursor instead of jumping there, and a random blink
+ * The almond shape, lash line, small wing and arched brow keep them closer to
+ * a drawn face than to two circles. A single pointer listener feeds a small
+ * rAF loop so the irises ease toward the cursor instead of jumping there, and
+ * a random blink
  * keeps them from feeling like pinned dots. Visitors who ask for reduced
  * motion get no blinking and no easing, but the irises still answer the
  * pointer directly: that movement is driven by the visitor rather than played
@@ -93,6 +97,9 @@ export default function LurkingEyes({ size = 'md', tone = 'blue', flip = false }
     const commit = (x: number, y: number) => {
       currentRef.current = { x, y }
       root.style.setProperty('--eye-x', `${x.toFixed(2)}px`)
+      // The left eye is drawn inside a mirrored group, so its horizontal
+      // offset has to be mirrored as well or the pair crosses itself.
+      root.style.setProperty('--eye-mirror-x', `${(-x).toFixed(2)}px`)
       root.style.setProperty('--eye-y', `${y.toFixed(2)}px`)
     }
 
@@ -230,14 +237,15 @@ export default function LurkingEyes({ size = 'md', tone = 'blue', flip = false }
           }`}
           style={{ width: shape.width, height: shape.height }}
         >
-          <svg viewBox="0 0 44 30" className="h-full w-full" aria-hidden="true" focusable="false">
+          <svg viewBox="0 -4 44 34" className="h-full w-full" aria-hidden="true" focusable="false">
             <g transform={eye === 0 ? 'translate(44 0) scale(-1 1)' : undefined}>
+              <path d={BROW_PATH} fill="#9b765f" opacity="0.9" />
               <path d={EYE_PATH} fill="#f8f4ea" stroke="#2f2822" strokeWidth="1.15" strokeLinejoin="round" />
 
               <g clipPath={`url(#${clipId})`}>
                 <g
                   style={{
-                    transform: 'translate3d(var(--eye-x, 0px), var(--eye-y, 0px), 0)',
+                    transform: `translate3d(${eye === 0 ? 'var(--eye-mirror-x, 0px)' : 'var(--eye-x, 0px)'}, var(--eye-y, 0px), 0)`,
                   }}
                 >
                   <circle
