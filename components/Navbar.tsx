@@ -121,7 +121,7 @@ export default function Navbar() {
               className="hidden items-center gap-2 rounded-sm border border-rule/20 px-2.5 py-1.5 font-mono text-[11px] text-muted transition-colors hover:border-accent hover:text-accent sm:flex"
             >
               <Search className="h-3.5 w-3.5" />
-              <span className="tabular">⌘K</span>
+              <span className="tabular hidden md:inline">⌘K</span>
             </button>
             <ThemeToggle />
             <LanguageToggle />

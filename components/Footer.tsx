@@ -175,18 +175,21 @@ export default function Footer() {
 
         <div className="mt-10 flex flex-col gap-3 border-t border-rule/15 pt-6 font-mono text-[11px] text-muted sm:flex-row sm:items-center sm:justify-between">
           <span className="flex items-center gap-3">
-            <LurkingEyes size="sm" tone="grey" />
+            <span className="hidden md:inline-flex">
+              <LurkingEyes size="sm" tone="grey" />
+            </span>
             <span className="tabular">© {currentYear} - {t('footer.builtBy')}</span>
           </span>
           <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {/* The one visible way into the key sheet. Quiet, but a visitor who
-                reads the bottom of a page can find it without being told. */}
+                reads the bottom of a page can find it without being told. The
+                mobile layout has no keyboard to offer, so it is left out there. */}
             <button
               type="button"
               onClick={openKeys}
               aria-label={t('keys.palette')}
               title={t('keys.palette')}
-              className="group inline-flex items-center gap-1.5 transition-colors hover:text-accent"
+              className="group hidden items-center gap-1.5 transition-colors hover:text-accent md:inline-flex"
             >
               <kbd className="rounded-sm border border-rule/25 px-1 py-0.5 font-mono text-[10px] leading-none text-muted transition-colors group-hover:border-accent/50 group-hover:text-accent">
                 ?

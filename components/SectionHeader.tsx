@@ -21,7 +21,9 @@ export default function SectionHeader({ index, title, subtitle, note, ornament }
       <div className="flex items-center gap-3 sm:gap-4">
         <span className="tabular font-mono text-xs text-accent">{index}</span>
         <span aria-hidden className="h-px flex-1 bg-rule/20" />
-        {ornament ? <span className="shrink-0">{ornament}</span> : null}
+        {/* Ornaments here are pointer decoration, so the mobile layout leaves
+            them out rather than showing a still drawing with nothing to follow. */}
+        {ornament ? <span className="hidden shrink-0 md:block">{ornament}</span> : null}
         {note ? (
           <span className="tabular font-mono text-[10px] uppercase tracking-[0.18em] text-muted sm:text-[11px]">
             {note}
